@@ -11,7 +11,7 @@ class AbstractScannerStrategy(ABC):
         pass
 
     @abstractmethod
-    def _parse(self):
+    def _parse(self, parse_information):
         pass
 
     @abstractmethod

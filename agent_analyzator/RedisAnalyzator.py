@@ -1,27 +1,44 @@
-#import redis.asyncio as redis
+import redis.asyncio as redis
 import asyncio
+import json
 
 
 class RedisAnalyzator:
 
-    def __init__(self):
-        pass
+    def __init__(self, channels):
+        self.client = redis.Redis(
+            host="localhost",
+            port=6379,
+            db=0,
+            decode_responses=True
+        )
 
-    async def get_data_from_agent(self) -> dict[str,dict]:
-        await asyncio.sleep(1)
-        return {
-            "172.17.0.3": {
-                "ports": {
-                    "80": {"scripts": ["check_sql_injection", "check_xss"]},
-                    "3306": {"scripts": ["check_mysql_empty_password"]},
-                    "443": {"scripts": ["check_heartbleed"]}
-                },
-                "global_scripts": ["check_os"],
-                "scanner": "nmap",
-                "ping": False,
-                "scan_speed": "normal",
-                "intensity": "deep"
-            }
-        }
+        self.channels: list[str] = channels
+        self.pubsub = self.client.pubsub()
+
+    @classmethod
+    async def create_connection(cls, channels) -> 'RedisAnalyzator':
+        instance = RedisAnalyzator(channels)
+
+        await instance.pubsub.subscribe(channels[0])
+        instance.iterator = instance.pubsub.listen()
+        return instance
+
+
+
+    async def get_data_from_agent(self) -> dict[str,dict] | None:
+        async for mg in self.iterator:
+            if mg["type"] == "message":
+               json_data:dict[str, dict] = json.loads(mg["data"])
+               return json_data
+
+    async def send_data_to_coordinator(self, data_json: dict):
+        data_json = json.dumps(data_json)
+        await self.client.publish(channel=self.channels[1], message=json.dumps(data_json))
+
+
+
+
+
 
 

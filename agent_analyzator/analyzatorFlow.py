@@ -1,4 +1,5 @@
 import asyncio
+import json
 from concurrent.futures import ThreadPoolExecutor
 from asyncio import AbstractEventLoop
 from RedisAnalyzator import RedisAnalyzator
@@ -21,25 +22,32 @@ def instructions_for_agent_execute(instructions:tuple[str, dict]):
        scanner = NmapScannerStrategy(instructions)
 
     result = scanner.execute()
+    return result
+
+
+
+
+async def run_analyzer_flow(instructions_for_agent: tuple[str, dict], loop: AbstractEventLoop, executor, redis_connector):
+    result = await loop.run_in_executor(executor, instructions_for_agent_execute, instructions_for_agent)
     print(result)
 
 
-
-async def run_analyzer_flow(instructions_for_agent: tuple[str, dict], loop: AbstractEventLoop, executor):
-    result = await loop.run_in_executor(executor, instructions_for_agent_execute, instructions_for_agent)
-
-    # Redis отправка
+    asyncio.create_task(redis_connector.send_data_to_coordinator(result))
 
 async def main():
     loop: AbstractEventLoop = asyncio.get_event_loop()
-    RedisConnection = RedisAnalyzator()
-    task_redis = asyncio.create_task(RedisConnection.get_data_from_agent())
+
+    RedisConnection = await RedisAnalyzator.create_connection(["coordinatorReceive", "coordinatorSend"])
+
+
     with ThreadPoolExecutor(max_workers=10) as executor:
-        for i in range(2):
+        while True:
+            print("Start")
+            task_redis = asyncio.create_task(RedisConnection.get_data_from_agent())
+            await task_redis
             ip_targets: dict[str, dict] = await task_redis
             for i in ip_targets.items():
-                asyncio.create_task(run_analyzer_flow(i, loop, executor))
-            await asyncio.sleep(5)
+                asyncio.create_task(run_analyzer_flow(i, loop, executor, RedisConnection))
 
 
 
