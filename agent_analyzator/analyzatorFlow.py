@@ -44,7 +44,6 @@ async def main():
         while True:
             print("Start")
             task_redis = asyncio.create_task(RedisConnection.get_data_from_agent())
-            await task_redis
             ip_targets: dict[str, dict] = await task_redis
             for i in ip_targets.items():
                 asyncio.create_task(run_analyzer_flow(i, loop, executor, RedisConnection))
