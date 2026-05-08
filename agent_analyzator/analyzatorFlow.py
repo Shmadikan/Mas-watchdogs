@@ -8,7 +8,7 @@ from ScannersStrategy.SearchSplotScannerStrategy import SearchSplotScannerStrate
 
 
 def instructions_for_agent_execute(instructions:tuple[str, dict]):
-    """Исполнение в потоке какого то из сканеров (пока два пусть)"""
+    """Исполнение в потоке какого то из сканеров (пока три пусть, но расширяемо через стратегии)"""
     print(instructions)
     scanner_name = instructions[1]["scanner"]
     scanner: AbstractScannerStrategy | None = None
@@ -47,9 +47,6 @@ async def main():
             ip_targets: dict[str, dict] = await task_redis
             for i in ip_targets.items():
                 asyncio.create_task(run_analyzer_flow(i, loop, executor, RedisConnection))
-
-
-
 
 asyncio.run(main())
 
