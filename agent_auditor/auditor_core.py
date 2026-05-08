@@ -2,10 +2,6 @@ import asyncio
 import json
 from concurrent.futures import ThreadPoolExecutor
 
-from click import password_option
-from redis.driver_info import resolve_driver_info
-from yaml.scanner import ScannerError
-
 from RedisAuditor import RedisAuditor
 import nmap
 from asyncio import Queue, AbstractEventLoop
