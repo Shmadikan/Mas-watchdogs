@@ -204,7 +204,7 @@
 <body>
 
 <div class="sidebar">
-    <a href="{% url 'auditor' %}" class="panel-btn" style="background-color: #f5f5f2; border-color: #d0d0d0;">
+    <a href="auditor" class="panel-btn" style="background-color: #f5f5f2; border-color: #d0d0d0;">
         <span class="icon">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.87-3.13-7-7-7zM9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1z" fill="currentColor"/>
@@ -214,7 +214,7 @@
         <span class="btn-text">Аудитор</span>
     </a>
 
-    <a href="{% url 'coordinator' %}" class="panel-btn">
+    <a href="coordinator" class="panel-btn">
         <span class="icon">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 9c-2.7 0-5.8 1.29-6 2h12c-.2-.71-3.3-2-6-2z" fill="currentColor"/>
@@ -225,7 +225,7 @@
         <span class="btn-text">Координатор</span>
     </a>
 
-    <a href="{% url 'settings' %}" class="panel-btn">
+    <a href="settings" class="panel-btn">
         <span class="icon">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.33-.02-.64-.06-.94l2.03-1.58c.18-.14.23-.38.12-.56l-1.89-3.28c-.12-.19-.36-.26-.56-.18l-2.39.96c-.5-.38-1.06-.68-1.66-.88L14.45 3.5c-.04-.2-.2-.34-.4-.34h-3.78c-.2 0-.36.14-.4.34l-.3 2.52c-.6.2-1.16.5-1.66.88l-2.39-.96c-.2-.08-.44 0-.56.18l-1.89 3.28c-.12.19-.07.42.12.56l2.03 1.58c-.04.3-.06.61-.06.94 0 .33.02.64.06.94l-2.03 1.58c-.18.14-.23.38-.12.56l1.89 3.28c.12.19.36.26.56.18l2.39-.96c.5.38 1.06.68 1.66.88l.3 2.52c.04.2.2.34.4.34h3.78c.2 0 .36-.14.4-.34l.3-2.52c.6-.2 1.16-.5 1.66-.88l2.39.96c.2.08.44 0 .56-.18l1.89-3.28c.12-.19.07-.42-.12-.56l-2.03-1.58zM12 15c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z" fill="currentColor"/>
@@ -247,6 +247,7 @@
                 <tr>
                     <th>ID</th>
                     <th>IP адрес</th>
+                    <th>Маска</th>
                     <th>Описание</th>
                     <th>Порты</th>
                 </tr>
@@ -256,6 +257,7 @@
                 <tr>
                     <td>{{ pool.id }}</td>
                     <td><code style="background: #f5f5f5; padding: 0.2rem 0.4rem; border-radius: 6px;">{{ pool.ip }}</code></td>
+                    <td>{{ pool.mask|default:"—" }}</td>
                     <td>{{ pool.description|default:"—" }}</td>
                     <td>
                         {% if pool.ports %}

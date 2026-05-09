@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Аудитор — Создание IP пула</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', system-ui, 'Helvetica Neue', sans-serif;
+            background: #f9f9f8;
+            color: #1a1a1a;
+            line-height: 1.4;
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 280px;
+            background-color: #ffffff;
+            border-right: 1px solid #eaeaea;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem 1rem;
+            gap: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .panel-btn {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            width: 100%;
+            padding: 1.5rem 1.25rem;
+            background: #ffffff;
+            border: 1px solid #e8e8e8;
+            border-radius: 20px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: #1e2a3a;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .panel-btn:hover {
+            background-color: #f5f5f2;
+            border-color: #d0d0d0;
+            transform: translateY(-1px);
+        }
+
+        .icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .btn-text {
+            flex: 1;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem 2.5rem;
+            overflow-y: auto;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 1.75rem;
+            font-weight: 500;
+            color: #1a1a1a;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: #6b6b6b;
+            font-size: 0.9rem;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: 16px;
+            border: 1px solid #eaeaea;
+            padding: 2rem;
+            max-width: 600px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #3c3c3c;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-family: inherit;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #b0b0b0;
+            box-shadow: 0 0 0 2px rgba(0,0,0,0.05);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .help-text {
+            font-size: 0.75rem;
+            color: #8f8f8f;
+            margin-top: 0.25rem;
+        }
+
+        /* Стили для ошибок */
+        .errorlist {
+            list-style: none;
+            margin-top: 0.25rem;
+            padding: 0;
+        }
+
+        .errorlist li {
+            color: #d32f2f;
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        .form-group.has-error input,
+        .form-group.has-error textarea {
+            border-color: #d32f2f;
+        }
+
+        .non-field-errors {
+            background: #fee;
+            border-left: 3px solid #d32f2f;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #d32f2f;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn-submit {
+            background: #1a1a1a;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-submit:hover {
+            background: #2c2c2c;
+            transform: translateY(-1px);
+        }
+
+        .btn-cancel {
+            background: white;
+            color: #5e5e5e;
+            border: 1px solid #e0e0e0;
+            padding: 0.75rem 1.5rem;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-cancel:hover {
+            background: #f5f5f2;
+            border-color: #c0c0c0;
+        }
+
+        @media (max-width: 700px) {
+            .sidebar {
+                width: 240px;
+                padding: 1.25rem 0.75rem;
+            }
+            .main-content {
+                padding: 1.5rem;
+            }
+            .form-container {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <a href="auditor" class="panel-btn" style="background-color: #f5f5f2; border-color: #d0d0d0;">
+        <span class="icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.87-3.13-7-7-7zM9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1z" fill="currentColor"/>
+                <circle cx="12" cy="9" r="2" fill="white" stroke="currentColor" stroke-width="1.2"/>
+            </svg>
+        </span>
+        <span class="btn-text">Аудитор</span>
+    </a>
+
+    <a href="coordinator" class="panel-btn">
+        <span class="icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 9c-2.7 0-5.8 1.29-6 2h12c-.2-.71-3.3-2-6-2z" fill="currentColor"/>
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.2" fill="white"/>
+                <path d="M17 7l2 2-5 5-3-3-4 4" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+            </svg>
+        </span>
+        <span class="btn-text">Координатор</span>
+    </a>
+
+    <a href="settings" class="panel-btn">
+        <span class="icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.33-.02-.64-.06-.94l2.03-1.58c.18-.14.23-.38.12-.56l-1.89-3.28c-.12-.19-.36-.26-.56-.18l-2.39.96c-.5-.38-1.06-.68-1.66-.88L14.45 3.5c-.04-.2-.2-.34-.4-.34h-3.78c-.2 0-.36.14-.4.34l-.3 2.52c-.6.2-1.16.5-1.66.88l-2.39-.96c-.2-.08-.44 0-.56.18l-1.89 3.28c-.12.19-.07.42.12.56l2.03 1.58c-.04.3-.06.61-.06.94 0 .33.02.64.06.94l-2.03 1.58c-.18.14-.23.38-.12.56l1.89 3.28c.12.19.36.26.56.18l2.39-.96c.5.38 1.06.68 1.66.88l.3 2.52c.04.2.2.34.4.34h3.78c.2 0 .36-.14.4-.34l.3-2.52c.6-.2 1.16-.5 1.66-.88l2.39.96c.2.08.44 0 .56-.18l1.89-3.28c.12-.19.07-.42-.12-.56l-2.03-1.58zM12 15c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z" fill="currentColor"/>
+            </svg>
+        </span>
+        <span class="btn-text">Настройки</span>
+    </a>
+</div>
+
+<div class="main-content">
+    <div class="page-header">
+        <h1>Создание IP пула</h1>
+        <p>Добавьте новый IP адрес с описанием и портами</p>
+    </div>
+
+    <div class="form-container">
+        <!-- Вывод non-field ошибок (например, уникальность или другие ошибки формы) -->
+        {% if form.non_field_errors %}
+            <div class="non-field-errors">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            <!-- Поле ip -->
+            <div class="form-group {% if form.ip.errors %}has-error{% endif %}">
+                <label for="{{ form.ip.id_for_label }}">IP адрес</label>
+                {{ form.ip }}
+                {% if form.ip.help_text %}
+                    <div class="help-text">{{ form.ip.help_text }}</div>
+                {% endif %}
+                {% if form.ip.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.ip.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <!-- Поле description -->
+            <div class="form-group {% if form.description.errors %}has-error{% endif %}">
+                <label for="{{ form.description.id_for_label }}">Описание</label>
+                {{ form.description }}
+                {% if form.description.help_text %}
+                    <div class="help-text">{{ form.description.help_text }}</div>
+                {% endif %}
+                {% if form.description.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.description.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <!-- Поле ports (JSONField) -->
+            <div class="form-group {% if form.ports.errors %}has-error{% endif %}">
+                <label for="{{ form.ports.id_for_label }}">Порты</label>
+                {{ form.ports }}
+                <div class="help-text">Введите список портов в формате JSON, например: [80, 443, 8080]</div>
+                {% if form.ports.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.ports.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+
+
+
+            <div class="form-group {% if form.mask.errors %}has-error{% endif %}">
+                <label for="{{ form.mask.id_for_label }}">Маска</label>
+                {{ form.mask }}
+                <div class="help-text">Введите маску в виде: xxxx.xxxx.xxxx.xxxx</div>
+                {% if form.mask.errors %}
+                    <ul class="errorlist">
+                        {% for error in form.mask.errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+
+
+
+            <div class="form-actions">
+                <button type="submit" class="btn-submit">Создать</button>
+                <a href="{% url 'auditor' %}" class="btn-cancel">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>
