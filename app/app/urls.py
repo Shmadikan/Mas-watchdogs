@@ -21,4 +21,5 @@ from admin_panel import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('panel/', views.panelView.as_view(), name='panel'),
+    path('panel/auditor/', views.auditorView.as_view(), name='auditor'),
 ]
