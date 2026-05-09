@@ -4,6 +4,7 @@ from django.shortcuts import render
 
 class IpPool(models.Model):
     ip = models.GenericIPAddressField()
+    mask = models.GenericIPAddressField()
     description = models.TextField(
         max_length=255
     )
