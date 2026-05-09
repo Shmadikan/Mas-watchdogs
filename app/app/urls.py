@@ -16,10 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from admin_panel import views
+from admin_panel import views as admin_views
+from auditor_panel import views as auditor_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('panel/', views.panelView.as_view(), name='panel'),
-    path('panel/auditor/', views.auditorView.as_view(), name='auditor'),
+    path('', admin_views.panelView.as_view(), name='panel'),
+    path('panel/auditor/', auditor_views.IpPoolRead.as_view(), name='auditor'),
+    path('panel/auditor/create', auditor_views.IpPoolCreate.as_view(), name='create'),
 ]
