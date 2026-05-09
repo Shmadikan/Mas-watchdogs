@@ -1,8 +1,15 @@
 from django.shortcuts import render
 from .models import *
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.urls import reverse_lazy
 
-class auditorView(ListView):
+class IpPoolRead(ListView):
     model = IpPool
     paginate_by = 20
     context_object_name = 'ip_pools'
+
+
+class IpPoolCreate(CreateView):
+    model = IpPool
+    fields = ['ip', 'description', 'ports', "mask"]
+    success_url = reverse_lazy("auditor")
