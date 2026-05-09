@@ -33,8 +33,9 @@ class RedisAnalyzator:
                return json_data
 
     async def send_data_to_coordinator(self, data_json: dict):
+        print("Send data to coordinator...")
         data_json = json.dumps(data_json)
-        await self.client.publish(channel=self.channels[1], message=json.dumps(data_json))
+        await self.client.publish(channel="analyze-coordinator", message=json.dumps(data_json))
 
 
 

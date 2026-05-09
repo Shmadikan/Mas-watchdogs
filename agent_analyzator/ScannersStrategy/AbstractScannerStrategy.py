@@ -7,11 +7,11 @@ class AbstractScannerStrategy(ABC):
         self.instructions = instructions
 
     @abstractmethod
-    def execute(self):
+    def execute(self) -> list[dict]:
         pass
 
     @abstractmethod
-    def _parse(self, parse_information):
+    def _parse(self, parse_information) -> list[dict]:
         pass
 
     @abstractmethod

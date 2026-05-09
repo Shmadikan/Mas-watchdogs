@@ -5,7 +5,7 @@ import re
 
 class NmapScannerStrategy(AbstractScannerStrategy):
 
-    def _parse(self, scan_result):
+    def _parse(self, scan_result) -> list[dict]:
         cve_pattern = re.compile(r'(CVE-\d{4}-\d{4,})', re.IGNORECASE)
         results = []
 
@@ -31,7 +31,7 @@ class NmapScannerStrategy(AbstractScannerStrategy):
 
         return results
 
-    def execute(self):
+    def execute(self) -> list[dict]:
         print("start execute")
         ip_address, arguments = self.instructions
         ports_and_scripts:dict[str, dict[str, list]] = arguments.get("ports")
@@ -59,14 +59,14 @@ class NmapScannerStrategy(AbstractScannerStrategy):
                 print(scanner.command_line())
                 result_scanner = self._parse(scanner._scan_result)
 
-                result_for_return.append(result_scanner)
+                result_for_return.extend(result_scanner)
         else:
             scanner = nmap.PortScanner()
             result_args = "--script" +" "+ ",".join(global_scripts) + " " + scan_speed + " " + intensity + " " + ping
 
             scanner.scan(ip_address, arguments=result_args, sudo=True)
             result_scanner = self._parse(scanner._scan_result)
-            result_for_return.append(result_scanner)
+            result_for_return.extend(result_scanner)
 
         return result_for_return
 
@@ -74,9 +74,9 @@ class NmapScannerStrategy(AbstractScannerStrategy):
         if scan_speed == "panic":
            return "-T0"
         elif scan_speed == "slow":
-           return "-T1"
+           return "-T4"
         elif scan_speed == "normal":
-           return "-T2"
+           return "-T4"
         elif scan_speed == "fast":
            return "-T3"
         elif scan_speed == "aggressive":
@@ -95,12 +95,6 @@ class NmapScannerStrategy(AbstractScannerStrategy):
            return "9"
         else:
            return "2"
-
-
-
-
-
-
 
 
     def _script_interpreter(self, script: str):

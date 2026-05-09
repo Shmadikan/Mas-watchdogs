@@ -51,7 +51,7 @@ def subnet_thread_analyze(subnet: str) -> dict:
     with Lock:
         scanned_nets[subnet] = results
 
-
+    print(results,"fmkwemkfwrw")
     return results
 
 
@@ -68,6 +68,7 @@ async def execute_analyze_subnet(executor: Executor, redis_audit: RedisAuditor, 
 
         results = await asyncio.gather(*tasks)
         tuples_result = parse_nmap_result(results)
+
 
         await redis_audit.send_data_to_coordinator(json.dumps(tuples_result))
 

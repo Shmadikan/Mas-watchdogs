@@ -11,7 +11,7 @@ class RedisAuditor:
             db=0,
             decode_responses=True
         )
-        self.coordinator_channel = "coordinatorSend"
+        self.coordinator_channel = "auditor-coordinator"
         self.external_channel = "externalReceive"
         self.pubsub = self.client.pubsub()
         self.iterator = None
@@ -32,4 +32,5 @@ class RedisAuditor:
 
 
     async def send_data_to_coordinator(self, message):
+        print("Отправляю данные")
         await self.client.publish(self.coordinator_channel, json.dumps(message))
