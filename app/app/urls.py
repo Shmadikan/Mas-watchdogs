@@ -21,7 +21,8 @@ from auditor_panel import views as auditor_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', admin_views.panelView.as_view(), name='panel'),
+    path('', admin_views.PanelView.as_view(), name='panel'),
+    path('/start_connection', admin_views.IpRun.as_view(), name='start_connection'),
     path('panel/auditor/', auditor_views.IpPoolRead.as_view(), name='auditor'),
     path('panel/auditor/create', auditor_views.IpPoolCreate.as_view(), name='create'),
     path('panel/auditor/<int:id>', auditor_views.IpPoolDetail.as_view(), name='detail'),
