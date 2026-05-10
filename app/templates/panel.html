@@ -246,7 +246,7 @@
                 <span>{{ pool.description }}</span>
                 <span class="label">Mask</span>
                 <span>{{ pool.mask }}</span>
-                <button class="run-btn" onclick="alert('Запущено: {{ pool.ip }}')">Запустить</button>
+                <button class="run-btn" data-id="{{ pool.id }}" data-ip="{{ pool.ip }}" data-description="{{ pool.description }}" data-mask="{{ pool.mask }}">Запустить</button>
             </div>
             {% empty %}
             <div class="data-row" style="text-align:center; color:#9a9a9a;">Нет данных</div>
@@ -274,6 +274,38 @@
                 alert('Настройки');
             });
         }
+
+        document.querySelectorAll('.run-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.dataset.id;
+                const ip = this.dataset.ip;
+                const description = this.dataset.description;
+                const mask = this.dataset.mask;
+
+                const data = {
+                    id: id,
+                    ip: ip,
+                    description: description,
+                    mask: mask
+                };
+
+                fetch('{% url "start_connection" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify(data)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Успех:', data);
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                });
+            });
+        });
     })();
 </script>
 </body>
