@@ -13,3 +13,15 @@ class IpPoolCreate(CreateView):
     model = IpPool
     fields = ['ip', 'description', 'ports', "mask"]
     success_url = reverse_lazy("auditor")
+
+
+class IpPoolDetail(DetailView):
+    model = IpPool
+    pk_url_kwarg = 'id'
+
+
+
+
+class IpPoolDelete(DeleteView):
+    model = IpPool
+    success_url = reverse_lazy("auditor")
