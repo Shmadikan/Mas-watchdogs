@@ -204,7 +204,7 @@
 <body>
 
 <div class="sidebar">
-    <a href="auditor" class="panel-btn" style="background-color: #f5f5f2; border-color: #d0d0d0;">
+    <a class="panel-btn" style="background-color: #f5f5f2; border-color: #d0d0d0;">
         <span class="icon">
             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 2C8.13 2 5 5.13 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.87-3.13-7-7-7zM9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1z" fill="currentColor"/>
@@ -255,7 +255,7 @@
             <tbody>
                 {% for pool in ip_pools %}
                 <tr>
-                    <td>{{ pool.id }}</td>
+                    <td onclick="window.location.href='{% url 'detail' pool.id %}'" style="cursor: pointer;">{{ pool.id }}</td>
                     <td><code style="background: #f5f5f5; padding: 0.2rem 0.4rem; border-radius: 6px;">{{ pool.ip }}</code></td>
                     <td>{{ pool.mask|default:"—" }}</td>
                     <td>{{ pool.description|default:"—" }}</td>
@@ -281,6 +281,11 @@
             </tbody>
         </table>
     </div>
+
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" onclick="window.location.href='{% url 'create' %}'" style="cursor: pointer;">
+  <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2"/>
+  <path d="M12 6V18M6 12H18" stroke="black" stroke-width="2" stroke-linecap="round"/>
+</svg>
 
     {% if is_paginated %}
     <div class="pagination">
