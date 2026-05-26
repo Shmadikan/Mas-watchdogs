@@ -1,6 +1,7 @@
 import redis.asyncio as redis
 import asyncio
 import json
+import aiohttp
 
 
 class RedisCoordinator:
@@ -18,6 +19,7 @@ class RedisCoordinator:
         self.queue_auditor = asyncio.Queue()
         self.pubsub = self.client.pubsub()
         self.iterator = None
+        self.django_url = "http://localhost:8729/analyze_result/"
 
     @classmethod
     async def create_connection(cls):
@@ -42,5 +44,13 @@ class RedisCoordinator:
 
     async def send_to_analizator(self, data: dict[str, dict]):
         await self.client.publish(self.analyze_send_channel, json.dumps(data))
+
+
+    async def send_report_to_django(self, report: dict):
+        async with aiohttp.ClientSession() as session:
+            async with session.post(self.django_url, json=report) as resp:
+                resp_text = await resp.text()
+                print(f"Django response: {resp.status} {resp_text}")
+                return resp_text
 
 
