@@ -1,0 +1,109 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam sequenceArrowThickness 2
+
+title Sequence-диаграмма: Django Web-приложение (app/)
+
+actor "Пользователь" as User
+participant "Браузер\n(panel.html)" as Browser
+box "Django Application (app/)" #LightYellow
+  participant "URL Router\n(app/urls.py)" as Router
+  participant "Views\n(admin_panel + auditor_panel)" as Views
+  participant "Serializers\n(admin_panel/serializer.py)" as Serializer
+  database "Models\n(auditor_panel/models.py)" as Model
+  database "SQLite\n(db.sqlite3)" as DB
+end box
+
+== Просмотр панели (Dashboard) ==
+User -> Browser : GET /
+Browser -> Router : GET /
+Router -> Views : PanelView.as_view()\n(ListView, model=IpPool)
+Views -> Model : IpPool.objects.all()
+Model -> DB : SELECT * FROM auditor_panel_ippool
+DB --> Model : QuerySet
+Model --> Views : ip_pools
+Views --> Browser : render(panel.html, {ip_pools})
+Browser --> User : Страница с таблицей IP-пулов\n+ кнопки "Run"
+
+== CRUD: Список IP-пулов ==
+User -> Browser : GET /panel/auditor/
+Browser -> Router : GET /panel/auditor/
+Router -> Views : IpPoolRead.as_view()\n(ListView, paginate_by=20)
+Views -> Model : IpPool.objects.all()
+Model -> DB : SELECT с пагинацией
+DB --> Model : QuerySet (20 записей)
+Model --> Views : ip_pools
+Views --> Browser : render(ippool_list.html)
+Browser --> User : Таблица IP-пулов с пагинацией
+
+== CRUD: Создание IP-пула ==
+User -> Browser : GET /panel/auditor/create
+Browser -> Router : GET /panel/auditor/create
+Router -> Views : IpPoolCreate.as_view()\n(IpPoolBaseView + CreateView)
+Views --> Browser : render(ippool_form.html)\nФорма: ip, mask, description, ports
+Browser --> User : Форма создания
+
+User -> Browser : POST /panel/auditor/create\n{ip, mask, description, ports}
+Browser -> Router : POST /panel/auditor/create
+Router -> Views : IpPoolCreate (обработка формы)
+Views -> Model : IpPool.objects.create(data)
+Model -> DB : INSERT INTO auditor_panel_ippool
+DB --> Model : OK
+Model --> Views : IpPool instance
+Views --> Browser : redirect /panel/auditor/ (success_url)
+Browser -> Router : GET /panel/auditor/
+Router --> Browser : Обновлённый список
+Browser --> User : Список с новым IP-пулом
+
+== CRUD: Детали / Обновление / Удаление ==
+User -> Browser : GET /panel/auditor/<id>
+Browser -> Router : GET /panel/auditor/<id>
+Router -> Views : IpPoolDetail.as_view()\n(DetailView, pk_url_kwarg='id')
+Views -> Model : IpPool.objects.get(pk=id)
+Model -> DB : SELECT WHERE id=<id>
+DB --> Model : IpPool instance
+Model --> Views : ip_pool
+Views --> Browser : render(ippool_detail.html)\nКнопки Edit / Delete
+
+User -> Browser : POST /panel/auditor/<id>/update
+Browser -> Router : POST /panel/auditor/<id>/update
+Router -> Views : IpPoolUpdate.as_view()\n(IpPoolBaseView + UpdateView)
+Views -> Model : instance.save()
+Model -> DB : UPDATE auditor_panel_ippool
+DB --> Model : OK
+Model --> Views : instance
+Views --> Browser : redirect /panel/auditor/
+
+User -> Browser : POST /panel/auditor/<id>/delete
+Browser -> Router : POST /panel/auditor/<id>/delete
+Router -> Views : IpPoolDelete.as_view()\n(DeleteView, success_url="auditor")
+Views -> Model : instance.delete()
+Model -> DB : DELETE FROM auditor_panel_ippool
+DB --> Model : OK
+Model --> Views : OK
+Views --> Browser : redirect /panel/auditor/
+
+== Запуск сканирования (API) ==
+User -> Browser : Нажимает "Run" для IP-пула
+Browser -> Browser : fetch('/start_connection', {\n  method: 'POST',\n  body: JSON.stringify(ip_data)\n})
+Browser -> Router : POST /start_connection
+Router -> Views : IpRun.as_view() (APIView)
+Views -> Serializer : IpSerializer(data=request.data)
+Serializer -> Model : Валидация полей IpPool
+Model --> Serializer : valid / invalid
+alt Данные валидны
+  Serializer --> Views : validated_data
+  Views --> Browser : 201 Created (JSON)
+else Данные невалидны
+  Serializer --> Views : errors
+  Views --> Browser : 400 Bad Request (errors)
+end
+
+note over Browser, Views
+  **ВАЖНО**: IpRun.post() только валидирует и возвращает данные.
+  Фактическая отправка в Redis/агенты НЕ реализована.
+  send_data_to_api() в coordinator_core — заглушка (pass).
+end note
+
+@enduml

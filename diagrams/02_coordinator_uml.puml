@@ -1,0 +1,67 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FEFEFE
+
+title UML-диаграмма: agent_coordinator
+
+package "agent_coordinator" {
+  
+  class RedisCoordinator {
+    - client: redis.Redis
+    - analyze_send_channel: str = "coordinator-analyze"
+    - auditor_receive_channel: str = "auditor-coordinator"
+    - analyze_receive_channel: str = "analyze-coordinator"
+    - queue_analyze: asyncio.Queue
+    - queue_auditor: asyncio.Queue
+    - pubsub: redis.client.PubSub
+    - iterator: AsyncIterator
+    --
+    + create_connection()$: RedisCoordinator
+    + get_data(): AsyncIterator
+    + send_to_analizator(data: dict): void
+  }
+
+  class coordinator_core <<main>> {
+    - client: OpenAI (deepseek-v4-pro)
+    - SYSTEM_PROMPT: str (PROMPT.md)
+    - messages: list[dict]
+    - scanned_vul: list[dict]
+    --
+    + send_data_to_api(redis_client): void (stub)
+    + get_data_from_analyze(redis_client): void
+    + send_data_to_analyze(data, redis_client): void
+    + main(): void
+  }
+
+  note right of coordinator_core::SYSTEM_PROMPT
+    Загружается из PROMPT.md
+    Описывает роль координатора,
+    доступные скрипты (20+),
+    формат JSON-ответа
+  end note
+
+  RedisCoordinator --> coordinator_core : используется в main()
+  coordinator_core ..> RedisCoordinator : create_connection()
+  
+  note bottom of coordinator_core
+    Основной цикл:
+    1. await queue_auditor.get()
+    2. Отправка в DeepSeek LLM
+    3. Парсинг JSON-ответа
+    4. send_to_analyze() → analyzer
+    5. Ожидание результатов от analyzer
+  end note
+}
+
+' Внешние зависимости
+cloud "Redis\n(localhost:6379)" as RedisDB
+cloud "DeepSeek API\n(api.deepseek.com)" as DeepSeek
+package "agent_auditor" as Auditor
+package "agent_analyzator" as Analyzer
+
+RedisCoordinator ..> RedisDB : pub/sub\nканалы: auditor-coordinator,\nanalyze-coordinator,\ncoordinator-analyze
+coordinator_core ..> DeepSeek : OpenAI client\nchat.completions.create()
+coordinator_core ..> Auditor : читает из queue_auditor
+coordinator_core ..> Analyzer : send_to_analizator()
+
+@enduml

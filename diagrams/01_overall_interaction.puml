@@ -1,0 +1,51 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FEFEFE
+skinparam sequenceArrowThickness 2
+
+title Общая схема взаимодействия агентов WatchDog-MAS
+
+actor "Внешний источник\n(External System)" as External
+participant "Auditor\n(agent_auditor)" as Auditor
+database "Redis Pub/Sub\n(localhost:6379)" as Redis
+participant "Coordinator\n(agent_coordinator)" as Coordinator
+participant "DeepSeek LLM\n(deepseek-v4-pro)" as LLM
+participant "Analyzer\n(agent_analyzator)" as Analyzer
+collections "Сканеры\n(ThreadPoolExecutor)" as Scanners
+
+== 1. Получение подсетей ==
+External -> Redis : publish(["192.168.1.0/24", ...])\nканал: externalReceive
+Redis --> Auditor : subscribe: externalReceive\nвозвращает список подсетей
+
+== 2. Сканирование сети ==
+Auditor -> Auditor : queue.put(subnets)\n→ execute_analyze_subnet()
+Auditor -> Scanners : ThreadPoolExecutor\nsubnet_thread_analyze(subnet)\nnmap -sS -sV -F -T4 --privileged
+Scanners --> Auditor : {host: {port: {proto, service, version}}}
+
+== 3. Передача результатов координатору ==
+Auditor -> Redis : publish(host_results)\nканал: auditor-coordinator
+Redis --> Coordinator : subscribe: auditor-coordinator\nqueue_auditor.put(data)
+
+== 4. Принятие решений через LLM ==
+Coordinator -> Coordinator : await queue_auditor.get()
+Coordinator -> LLM : chat.completions.create(\n  model="deepseek-v4-pro",\n  messages=[SYSTEM_PROMPT, user_data],\n  response_format={type: "json_object"}\n)
+LLM --> Coordinator : JSON: {IP: {ports, scripts,\n  global_scripts, scanner, ping,\n  scan_speed, intensity}}
+
+== 5. Отправка инструкций анализатору ==
+Coordinator -> Redis : publish(scan_instructions)\nканал: coordinator-analyze
+Redis --> Analyzer : subscribe: coordinator-analyze\nget_data_from_agent()
+
+== 6. Выполнение сканирования уязвимостей ==
+Analyzer -> Analyzer : for each IP: выбирает стратегию\n(NmapScannerStrategy / Nuclei / SearchSplot)
+Analyzer -> Scanners : ThreadPoolExecutor\ninstructions_for_agent_execute()
+Scanners -> Scanners : nmap --script <scripts>\n-T <speed> --version-intensity <depth>
+Scanners --> Analyzer : [{host, port, cves: [...]}, ...]
+
+== 7. Возврат результатов ==
+Analyzer -> Redis : publish(vuln_results)\nканал: analyze-coordinator
+Redis --> Coordinator : subscribe: analyze-coordinator\nqueue_analyze.put(data)
+
+== 8. Периодическое пересканирование (Auditor) ==
+Auditor -> Auditor : analyze_subnet_timer()\nкаждые 30 сек: ping_scan vs known_hosts\nпри изменениях → пересканирование
+
+@enduml

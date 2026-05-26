@@ -165,7 +165,7 @@
             flex: 1;
             background: #f9f9f8;
             min-height: 100vh;
-            padding: 2rem 2.5rem;
+            padding: 2.5rem 3rem;
         }
 
         .greeting {
@@ -175,6 +175,232 @@
             opacity: 0.65;
             pointer-events: none;
             user-select: none;
+        }
+
+        .report-container {
+            display: none;
+            flex-direction: column;
+            gap: 1.75rem;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .report-container.visible {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #1e2a3a 0%, #2c3a4e 100%);
+            color: #ffffff;
+            padding: 1.5rem 1.75rem;
+            border-radius: 14px;
+            font-size: 1.15rem;
+            line-height: 1.6;
+            box-shadow: 0 2px 12px rgba(30,42,58,0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .summary-card::before {
+            content: 'EXECUTIVE SUMMARY';
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.8px;
+            color: rgba(255,255,255,0.45);
+        }
+
+        .section-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #8a8a8a;
+            margin-bottom: 0.65rem;
+        }
+
+        .findings-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .finding-card {
+            background: #ffffff;
+            border: 1px solid #eaeaea;
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            gap: 0.65rem;
+            transition: box-shadow 0.2s ease;
+        }
+
+        .finding-card:hover {
+            box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+        }
+
+        .finding-header {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .finding-cve {
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1e2a3a;
+            background: #f0f2f5;
+            padding: 0.2rem 0.6rem;
+            border-radius: 5px;
+        }
+
+        .badge {
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 0.25rem 0.7rem;
+            border-radius: 20px;
+            letter-spacing: 0.3px;
+        }
+
+        .badge-critical {
+            background: #fde8e8;
+            color: #b91c1c;
+        }
+
+        .badge-moderate {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-low {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .summary-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: rgba(255,255,255,0.5);
+            margin-bottom: 0.35rem;
+        }
+
+        .cvss-badge {
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 0.25rem 0.65rem;
+            border-radius: 20px;
+            background: #ececec;
+            color: #5a5a5a;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+        }
+
+        .finding-title {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #1e2a3a;
+        }
+
+        .finding-impact {
+            font-size: 1.05rem;
+            color: #6b3a3a;
+            line-height: 1.5;
+            background: #fef5f5;
+            border-left: 3px solid #e5a0a0;
+            padding: 0.7rem 0.9rem;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .finding-remediation {
+            font-size: 1.05rem;
+            color: #2d3a2d;
+            line-height: 1.5;
+            background: #f2f7f2;
+            border-left: 3px solid #8bc48b;
+            padding: 0.7rem 0.9rem;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .finding-desc {
+            font-size: 1.05rem;
+            color: #4a4a4a;
+            line-height: 1.5;
+        }
+
+        .finding-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: #9a9a9a;
+        }
+
+        .finding-meta span {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .rec-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            counter-reset: rec-counter;
+        }
+
+        .rec-item {
+            background: #f8faf9;
+            border: 1px solid #e8ece9;
+            border-radius: 10px;
+            padding: 0.85rem 1.15rem;
+            font-size: 1.05rem;
+            color: #2d3a2d;
+            line-height: 1.5;
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-start;
+        }
+
+        .rec-item::before {
+            counter-increment: rec-counter;
+            content: counter(rec-counter);
+            flex-shrink: 0;
+            width: 26px;
+            height: 26px;
+            background: #2d8a4e;
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin-top: 1px;
+        }
+
+        .loading {
+            display: none;
+            color: #3a3a3a;
+            font-size: 0.95rem;
+            font-weight: 400;
+            opacity: 0.65;
+        }
+
+        .loading.visible {
+            display: block;
         }
 
         @media (max-width: 550px) {
@@ -255,7 +481,19 @@
     </div>
 
     <div class="main-area">
-        <div class="greeting">● Интерфейс в стиле Claude</div>
+        <div class="greeting" id="placeholder">● Здесь будут размещены ваши задачи!</div>
+        <div class="loading" id="loading">● Идёт анализ...</div>
+        <div class="report-container" id="reportContainer">
+            <div id="reportSummary"></div>
+            <div>
+                <div class="section-title">Найденные уязвимости</div>
+                <div class="findings-grid" id="reportFindings"></div>
+            </div>
+            <div>
+                <div class="section-title">Рекомендации</div>
+                <div class="rec-list" id="reportRecs"></div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -275,6 +513,90 @@
             });
         }
 
+        const mainArea = document.querySelector('.main-area');
+        const placeholder = document.getElementById('placeholder');
+        const loading = document.getElementById('loading');
+        const reportContainer = document.getElementById('reportContainer');
+        const reportSummary = document.getElementById('reportSummary');
+        const reportFindings = document.getElementById('reportFindings');
+        const reportRecs = document.getElementById('reportRecs');
+
+        function showLoading() {
+            placeholder.style.display = 'none';
+            reportContainer.classList.remove('visible');
+            loading.classList.add('visible');
+        }
+
+        function showError(msg) {
+            loading.classList.remove('visible');
+            reportContainer.classList.remove('visible');
+            placeholder.textContent = '● ' + msg;
+            placeholder.style.display = 'block';
+        }
+
+        function severityBadge(severity) {
+            const map = {
+                'Critical': 'badge-critical',
+                'High': 'badge-critical',
+                'Moderate': 'badge-moderate',
+                'Medium': 'badge-moderate',
+                'Low': 'badge-low',
+            };
+            return map[severity] || 'badge-info';
+        }
+
+        function renderReport(report) {
+            loading.classList.remove('visible');
+            placeholder.style.display = 'none';
+            reportContainer.classList.add('visible');
+
+            reportSummary.innerHTML = ''
+                + '<div class="summary-card">'
+                +   '<div>' + report.summary + '</div>'
+                + '</div>';
+
+            reportFindings.innerHTML = report.findings.map(f =>
+                '<div class="finding-card">'
+                + '<div class="finding-header">'
+                +   '<span class="finding-title">' + (f.title || '') + '</span>'
+                +   (f.cvss ? '<span class="cvss-badge">CVSS ' + f.cvss + '</span>' : '')
+                +   '<span class="badge ' + severityBadge(f.severity) + '">' + f.severity + '</span>'
+                + '</div>'
+                + (f.cve ? '<div><span class="finding-cve">' + f.cve + '</span></div>' : '')
+                + '<div class="finding-meta">'
+                +   '<span>Хост: ' + f.host + '</span>'
+                +   '<span>Порт: ' + f.port + '</span>'
+                + '</div>'
+                + '<div class="finding-desc"><b>Описание:</b> ' + f.description + '</div>'
+                + (f.impact ? '<div class="finding-impact"><b>Влияние:</b> ' + f.impact + '</div>' : '')
+                + (f.remediation ? '<div class="finding-remediation"><b>Рекомендации по устранению:</b> ' + f.remediation + '</div>' : '')
+                + '</div>'
+            ).join('');
+
+            reportRecs.innerHTML = report.recommendations.map(r =>
+                '<div class="rec-item">' + r + '</div>'
+            ).join('');
+        }
+
+        function pollReport() {
+            console.log('Polling started');
+            const interval = setInterval(() => {
+                fetch(`/get_report/`)
+                    .then(r => {
+                        console.log('Poll response status:', r.status);
+                        return r.json();
+                    })
+                    .then(data => {
+                        console.log('Poll data:', data);
+                        if (data.report) {
+                            clearInterval(interval);
+                            renderReport(data.report);
+                        }
+                    })
+                    .catch(err => console.error('Poll error:', err));
+            }, 2000);
+        }
+
         document.querySelectorAll('.run-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 const id = this.dataset.id;
@@ -289,6 +611,8 @@
                     mask: mask
                 };
 
+                showLoading();
+
                 fetch('{% url "start_connection" %}', {
                     method: 'POST',
                     headers: {
@@ -300,11 +624,16 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log('Успех:', data);
+                    pollReport();
                 })
                 .catch(error => {
                     console.error('Ошибка:', error);
+                    showError('Ошибка запуска');
                 });
             });
+        });
+
+
         });
     })();
 </script>

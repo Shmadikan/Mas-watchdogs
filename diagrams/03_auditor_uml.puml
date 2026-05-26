@@ -1,0 +1,75 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FEFEFE
+
+title UML-диаграмма: agent_auditor
+
+package "agent_auditor" {
+
+  class RedisAuditor {
+    - client: redis.Redis
+    - coordinator_channel: str = "auditor-coordinator"
+    - external_channel: str = "externalReceive"
+    - pubsub: redis.client.PubSub
+    - iterator: AsyncIterator
+    --
+    + create_connection()$: RedisAuditor
+    + data_from_external_source(): list[str] | None
+    + send_data_to_coordinator(message): void
+  }
+
+  class auditor_core <<main>> {
+    - INTERVAL_TIME_SECONDS: int = 30
+    - queue: asyncio.Queue
+    - scanned_nets: dict
+    - Lock: threading.Lock
+    --
+    + ping_scan(subnet): list[str]
+    + parse_nmap_result(results): list[tuple]
+    + subnet_thread_analyze(subnet): dict
+    + execute_analyze_subnet(executor, ...): void
+    + analyze_subnet_timer(executor, ...): void
+    + main(): void
+  }
+
+  RedisAuditor --> auditor_core : используется в main()
+  auditor_core ..> RedisAuditor : create_connection()
+
+  note right of auditor_core::subnet_thread_analyze
+    nmap -sS -sV -F -T4 --privileged
+    Возвращает:
+    {host: {port: {proto, service, version}}}
+    Сохраняет в scanned_nets под Lock
+  end note
+
+  note right of auditor_core::analyze_subnet_timer
+    Каждые 30 сек:
+    - ping_scan() для каждой подсети
+    - Сравнение с scanned_nets
+    - При изменениях → пересканирование
+    - Отправка новых хостов координатору
+  end note
+
+  note bottom of auditor_core::main
+    Основной цикл:
+    1. data_from_external_source() → список подсетей
+    2. queue.put(subnets)
+    3. execute_analyze_subnet() обрабатывает очередь
+    4. Результаты → send_data_to_coordinator()
+  end note
+}
+
+' Внешние зависимости
+cloud "Redis\n(localhost:6379)" as RedisDB
+package "agent_coordinator" as Coordinator
+actor "Внешний источник" as External
+
+RedisAuditor ..> RedisDB : pub/sub\nканалы: externalReceive,\nauditor-coordinator
+auditor_core ..> External : получение списка подсетей\nиз канала externalReceive
+auditor_core ..> Coordinator : send_data_to_coordinator()
+
+' Nmap зависимость
+database "Nmap\n(python-nmap)" as NmapLib
+auditor_core ..> NmapLib : nmap.PortScanner()\nping_scan, subnet_thread_analyze
+
+@enduml

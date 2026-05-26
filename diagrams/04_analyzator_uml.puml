@@ -1,0 +1,115 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FEFEFE
+
+title UML-диаграмма: agent_analyzator + Scanner Strategies
+
+package "agent_analyzator" {
+
+  class RedisAnalyzator {
+    - client: redis.Redis
+    - channels: list[str]
+    - pubsub: redis.client.PubSub
+    - iterator: AsyncIterator
+    --
+    + create_connection(channels)$: RedisAnalyzator
+    + get_data_from_agent(): dict[str, dict] | None
+    + send_data_to_coordinator(data_json: dict): void
+  }
+
+  class analyzer_core <<main>> {
+    --
+    + instructions_for_agent_execute(instructions): list[dict]
+    + run_analyzer_flow(instructions, loop, executor, ...): list[dict]
+    + collect_all_info(tasks, redis_connector): void
+    + main(): void
+  }
+
+  note right of analyzer_core::main
+    Основной цикл:
+    1. get_data_from_agent() → IP targets
+    2. Для каждого IP: run_analyzer_flow()
+       в ThreadPoolExecutor (max 10)
+    3. collect_all_info() собирает результаты
+    4. send_data_to_coordinator()
+  end note
+
+  note right of analyzer_core::instructions_for_agent_execute
+    Фабрика стратегий:
+    - "nmap" → NmapScannerStrategy
+    - "nuclei" → NucleiScannerStrategy
+    - "searchsplot" → SearchSplotScannerStrategy
+  end note
+
+  RedisAnalyzator --> analyzer_core : используется в main()
+  analyzer_core ..> RedisAnalyzator : create_connection()
+}
+
+package "ScannersStrategy" {
+  
+  abstract class AbstractScannerStrategy {
+    # instructions: tuple[str, dict[str, Any]]
+    --
+    + execute() <<abstract>> : list[dict]
+    - _parse(parse_information) <<abstract>> : list[dict]
+    - _script_interpreter(script: str) <<abstract>>
+  }
+
+  class NmapScannerStrategy {
+    --
+    + execute(): list[dict]
+    - _parse(scan_result): list[dict]
+    - _script_interpreter(script: str): str
+    + scan_speed(scan_speed): str
+    + intensity_depth(intensity): str
+  }
+
+  class NucleiScannerStrategy {
+    --
+    + execute(): pass (stub)
+    - _parse(): pass (stub)
+    - _instruction_interpreter(): pass (stub)
+  }
+
+  class SearchSplotScannerStrategy {
+    --
+    + execute(): pass (stub)
+    - _parse(): pass (stub)
+    - _instruction_interpreter(): pass (stub)
+  }
+
+  AbstractScannerStrategy <|-- NmapScannerStrategy
+  AbstractScannerStrategy <|-- NucleiScannerStrategy
+  AbstractScannerStrategy <|-- SearchSplotScannerStrategy
+
+  note bottom of NmapScannerStrategy
+    Единственный полностью реализованный сканер.
+    _script_interpreter: 18+ маппингов скриптов
+    (ssl_check_heartbleed → ssl-heartbleed, ...)
+    scan_speed: panic/slow/normal/fast/aggressive/hyper
+    intensity_depth: low(0)/medium(4)/high(9)
+  end note
+
+  note bottom of NucleiScannerStrategy
+    ЗАГЛУШКА — не реализован
+    Предназначен для интеграции с Nuclei
+  end note
+
+  note bottom of SearchSplotScannerStrategy
+    ЗАГЛУШКА — не реализован
+    Предназначен для интеграции с searchsploit
+  end note
+}
+
+analyzer_core ..> AbstractScannerStrategy : создаёт через фабрику\ninstructions_for_agent_execute()
+
+' Внешние зависимости
+cloud "Redis\n(localhost:6379)" as RedisDB
+cloud "Nmap\n(python-nmap)" as NmapLib
+package "agent_coordinator" as Coordinator
+
+RedisAnalyzator ..> RedisDB : pub/sub\nканалы: coordinator-analyze,\nanalyze-coordinator
+analyzer_core ..> Coordinator : send_data_to_coordinator()
+NmapScannerStrategy ..> NmapLib : nmap.PortScanner().scan()
+
+@enduml
