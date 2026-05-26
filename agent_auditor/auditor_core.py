@@ -79,11 +79,12 @@ async def analyze_subnet_timer(executor: Executor, loop: AbstractEventLoop, redi
     await asyncio.sleep(INTERVAL_TIME_SECONDS)
     data_send = []
     print("start planning analyze of all subnets...")
-    for subnet in scanned_nets:
-        if len(ping_scan(subnet)) != len(scanned_nets[subnet]):
-           result = await loop.run_in_executor(executor, subnet_thread_analyze, subnet)
-           tuple_parameters:list[tuple] = parse_nmap_result([result])
-           data_send.extend(tuple_parameters)
+    with Lock:
+        for subnet in scanned_nets:
+            if len(ping_scan(subnet)) != len(scanned_nets[subnet]):
+               result = await loop.run_in_executor(executor, subnet_thread_analyze, subnet)
+               tuple_parameters:list[tuple] = parse_nmap_result([result])
+               data_send.extend(tuple_parameters)
 
 
     if len(data_send) != 0:
