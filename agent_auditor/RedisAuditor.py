@@ -24,6 +24,7 @@ class RedisAuditor:
         return instance
 
     async def data_from_external_source(self) -> list[str] | None:
+        'format: [172.17.0.4/24]'
         async for message in self.iterator:
             if message["type"] == "message":
                json_data: list[str] = json.loads(message["data"])
