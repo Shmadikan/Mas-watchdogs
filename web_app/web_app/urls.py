@@ -21,5 +21,7 @@ from main_page import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('control/', views.ControlPage.as_view(), name = "control_page"),
-    path('control/ip/<int:pk>/', views.IpPageUpdate.as_view(), name = "ip")
+    path('control/ip/update/<int:pk>/', views.IpPageUpdate.as_view(), name = "ip"),
+    path('control/ip/create', views.IpPageCreate.as_view(), name = "ip_create"),
+    path('control/ip/delete/<int:pk>/', views.IpPageDelete.as_view(), name = "ip_delete")
 ]
