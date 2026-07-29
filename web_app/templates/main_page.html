@@ -3,8 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <style>
+        .table-wrapper {
+            border: 1px solid var(--pico-muted-border-color);
+            width: 25%;
+            min-height: 55vh;
+            max-height: 55vh;
+            overflow-y: auto;
+        }
+        .button-row {
+            display: flex;
+            gap: 0.5rem;
+        }
+    </style>
 </head>
 <body>
-
+    <main>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>IP</th>
+                        <th>Subnet</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in ips %}
+                        <tr>
+                            <td> <a href="{% url 'ip' item.id %}"> {{ item.ip }}</a> </td>
+                            <td>{{ item.subnet }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="2">Ip list is empty</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="button-row">
+            <a href="{% url 'ip_create' %}">
+                <button>Add net</button>
+            </a>
+            <button disabled>Button 2</button>
+            <button disabled>Button 3</button>
+        </div>
+    </main>
 </body>
 </html>
