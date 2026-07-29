@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit IP</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <style>
+        .form-card {
+            max-width: 480px;
+            margin: 2rem auto;
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <nav>
+            <ul>
+                <li><a href="{% url 'control_page' %}">&larr; Back</a></li>
+            </ul>
+        </nav>
+        <article class="form-card">
+            <header>
+                <h2>Edit IP Entry</h2>
+            </header>
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                    <label>
+                        {{ field.label }}
+                        {{ field }}
+                    </label>
+                    {% if field.errors %}
+                        <small style="color: var(--pico-del-color);">{{ field.errors }}</small>
+                    {% endif %}
+                {% endfor %}
+                <footer>
+                    <button type="submit">Update</button>
+                </footer>
+                <footer>
+                    <button type="submit">Delete</button>
+                </footer>
+            </form>
+        </article>
+    </main>
+</body>
+</html>
