@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <style>
+        .form-card {
+            max-width: 480px;
+            margin: 2rem auto;
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <nav>
+            <ul>
+                <li><a href="{% url 'profiles_view' %}">&larr; Back</a></li>
+            </ul>
+        </nav>
+        <article class="form-card">
+            <header>
+                <h2>Create Profile</h2>
+            </header>
+            <form action="" method="post">
+                {% csrf_token %}
+                <label>
+                    Username
+                    {{ form.username }}
+                </label>
+                <label>
+                    Password
+                    {{ form.password }}
+                </label>
+                <footer>
+                    <button type="submit">Отправить</button>
+                </footer>
+            </form>
+        </article>
+    </main>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <style>
+        .table-wrapper {
+            border: 1px solid var(--pico-muted-border-color);
+            width: 25%;
+            min-height: 55vh;
+            max-height: 55vh;
+            overflow-y: auto;
+        }
+        .button-row {
+            display: flex;
+            gap: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td>{{ user.username }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td>User list is empty</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="button-row">
+            <a href="{% url 'profile_create' %}">
+                <button>Make new profile</button>
+            </a>
+        </div>
+    </main>
+</body>
+</html>
