@@ -30,6 +30,5 @@ urlpatterns = [
     path('control/ip/delete/<int:pk>/', m_views.IpPageDelete.as_view(), name = "ip_delete"),
     path('profiles/', p_views.ProfilesView.as_view(), name = 'profiles_view'),
     path('profiles/registrate/', p_views.ProfileCreate.as_view(), name = 'profile_create'),
-    path('profiles/login', p_views.ProfileLogin.as_view(), name='profile_login'),
     path('__debug__/', include(debug_toolbar.urls))
 ]
