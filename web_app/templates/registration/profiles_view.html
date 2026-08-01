@@ -7,35 +7,57 @@
     <style>
         .table-wrapper {
             border: 1px solid var(--pico-muted-border-color);
-            width: 25%;
+            width: 35%;
+            margin: 0 auto;
             min-height: 55vh;
             max-height: 55vh;
             overflow-y: auto;
+            padding: 1rem;
+        }
+        .table-wrapper form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
         }
         .button-row {
             display: flex;
-            gap: 0.5rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+        .profile-icon {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+        .profile-icon svg {
+            color: var(--pico-primary);
+        }
+        .profiles-heading {
+            text-align: center;
+            margin-bottom: 1rem;
         }
     </style>
 </head>
 <body>
     <main>
+        <div class="profile-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="12" cy="7" r="4"/>
+            </svg>
+        </div>
+        <h3 class="profiles-heading">Choose your profile</h3>
         <div class="table-wrapper">
-
-
-
-                    <form method="post" action="">
-                        {% csrf_token %}
-                        {% for user in users %}
-                            <button type="submit" name="username" value="{{ user }}">
-                                {{ user }}
-                            </button>
-                        {% empty %}
-                            User list is empty
-                        {% endfor %}
-                    </form>
-
-
+            <form method="post" action="">
+                {% csrf_token %}
+                {% for user in users %}
+                    <button type="submit" name="username" value="{{ user }}">
+                        {{ user }}
+                    </button>
+                {% empty %}
+                    User list is empty
+                {% endfor %}
+            </form>
         </div>
         <div class="button-row">
             <a href="{% url 'profile_create' %}">
