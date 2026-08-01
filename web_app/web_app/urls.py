@@ -15,13 +15,21 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
-from main_page import views
+from django.urls import path, include
+from main_page import views as m_views
+from profiles import views as p_views
+from django.contrib.auth.views import LoginView
+
+import debug_toolbar
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('control/', views.ControlPage.as_view(), name = "control_page"),
-    path('control/ip/update/<int:pk>/', views.IpPageUpdate.as_view(), name = "ip"),
-    path('control/ip/create', views.IpPageCreate.as_view(), name = "ip_create"),
-    path('control/ip/delete/<int:pk>/', views.IpPageDelete.as_view(), name = "ip_delete")
+    path('control/', m_views.ControlPage.as_view(), name = "control_page"),
+    path('control/ip/update/<int:pk>/', m_views.IpPageUpdate.as_view(), name = "ip"),
+    path('control/ip/create', m_views.IpPageCreate.as_view(), name = "ip_create"),
+    path('control/ip/delete/<int:pk>/', m_views.IpPageDelete.as_view(), name = "ip_delete"),
+    path('profiles/', p_views.ProfilesView.as_view(), name = 'profiles_view'),
+    path('profiles/registrate/', p_views.ProfileCreate.as_view(), name = 'profile_create'),
+    path('profiles/login', p_views.ProfileLogin.as_view(), name='profile_login'),
+    path('__debug__/', include(debug_toolbar.urls))
 ]
