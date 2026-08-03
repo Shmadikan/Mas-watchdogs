@@ -11,9 +11,10 @@ from .models import IpTable, ScanResult
 class ControlPage(LoginRequiredMixin, View):
     raise_exception = True
     def get(self, request, *args, **kwargs):
+        user_id = self.request.session.get('_auth_user_id')
         context = {
-        "ips": IpTable.objects.all(),
-        "results": ScanResult.objects.all()
+            "ips": IpTable.objects.all().filter(id=user_id),
+            "results": ScanResult.objects.all()
         }
         return render(request, "main_page.html", context=context)
 
