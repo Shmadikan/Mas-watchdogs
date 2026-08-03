@@ -13,7 +13,7 @@ class ControlPage(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         user_id = self.request.session.get('_auth_user_id')
         context = {
-            "ips": IpTable.objects.all().filter(id=user_id),
+            "ips": IpTable.objects.all().filter(user_id_id=user_id),
             "results": ScanResult.objects.all()
         }
         return render(request, "main_page.html", context=context)
@@ -32,6 +32,10 @@ class IpPageUpdate(IpCrudMixin, UpdateView):
 
 class IpPageCreate(IpCrudMixin, CreateView):
     template_name = 'ip_page_form.html'
+    def form_valid(self, form):
+        model = form.instance
+        model.user_id_id = self.request.session.get('_auth_user_id')
+        return super().form_valid(form)
 
 
 class IpPageDelete(IpCrudMixin, DeleteView):
