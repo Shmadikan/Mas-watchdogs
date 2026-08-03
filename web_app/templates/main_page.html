@@ -21,6 +21,7 @@
 <body>
     <main>
         <div class="table-wrapper">
+            {{ user }}
             <table>
                 <thead>
                     <tr>
@@ -48,6 +49,9 @@
             </a>
             <button disabled>Button 2</button>
             <button disabled>Button 3</button>
+            <a href="{% url 'profiles_view' %}">
+                <button>Back to profiles</button>
+            </a>
         </div>
     </main>
 </body>
