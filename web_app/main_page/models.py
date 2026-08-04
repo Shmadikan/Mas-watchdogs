@@ -1,6 +1,6 @@
+from django.utils.timezone import now
 from django.db import models
 from django.db.models import CASCADE
-from dns.rdatatype import NULL
 from django.contrib.auth.models import User
 
 
@@ -15,4 +15,11 @@ class ScanResult(models.Model):
     description = models.TextField()
     date = models.DateTimeField()
     ip_fk = models.ForeignKey(IpTable, on_delete=models.SET_NULL, related_name="scanResult", null=True)
+
+    @classmethod
+    def handle_ip(cls, ip_list: list[dict[str, str]]):
+
+        for data in ip_list:
+            scan = ScanResult(title="", description="", date=now(), ip_fk=IpTable.objects.get(id=data['id']))
+            scan.save()
 
