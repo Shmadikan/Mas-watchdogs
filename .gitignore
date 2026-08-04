@@ -58,6 +58,7 @@ db.sqlite3-journal
 media/
 staticfiles/
 static/
+!web_app/static/
 
 # Миграции (опционально, обычно не игнорируют)
 # */migrations/*.py

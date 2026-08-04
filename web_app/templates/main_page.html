@@ -7,7 +7,6 @@
     <style>
         .table-wrapper {
             border: 1px solid var(--pico-muted-border-color);
-            width: 25%;
             min-height: 55vh;
             max-height: 55vh;
             overflow-y: auto;
@@ -16,43 +15,90 @@
             display: flex;
             gap: 0.5rem;
         }
+        .ip-list {
+            display: inline-flex;
+            align-content: center;
+            justify-content: center;
+        }
+        .tables-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+        }
+        .ip-column {
+            width: 25%;
+        }
+        .ip-column .table-wrapper {
+            width: 100%;
+        }
+        .results-wrapper {
+            background-color: var(--pico-muted-border-color);
+            width: 60%;
+        }
     </style>
 </head>
-<body>
+<body data-get-url="{% url 'ip_scan_results' %}">
+    {% load static %}
     <main>
-        <div class="table-wrapper">
-            {{ user }}
+        <div class="tables-row">
+            <div class="ip-column">
+                <div class="table-wrapper">
+                    {{ user }}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>IP</th>
+                                <th>Subnet</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            
+                            {% for item in ips %}
+                                <tr id="ip-table">
+                                
+                                    <td> <a href="{% url 'ip' item.id %}" data-user-id="{{item.id}}">{{ item.ip }}</a> </td>
+                                    <td><a>{{ item.subnet }}</a></td>
+                                    <td><input type="checkbox" class="ip-list"></td>
+                                    
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="2">Ip list is empty</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="button-row">
+                    <a href="{% url 'ip_create' %}">
+                        <button>Add net</button>
+                    </a>
+                    <button id="analysis-button" data-url="{% url 'ip_send' %}" data-token="{{ csrf_token }}">Analyze selected</button>
+                    <button id="select-button">Select All</button>
+                    <a href="{% url 'profiles_view' %}">
+                        <button>Back to profiles</button>
+                    </a>
+                </div>
+            </div>
+
+            <div class="table-wrapper results-wrapper">
             <table>
                 <thead>
                     <tr>
-                        <th>IP</th>
-                        <th>Subnet</th>
+                        <th></th>
                     </tr>
                 </thead>
-                <tbody>
-                    {% for item in ips %}
-                        <tr>
-                            <td> <a href="{% url 'ip' item.id %}"> {{ item.ip }}</a> </td>
-                            <td>{{ item.subnet }}</td>
-                        </tr>
-                    {% empty %}
-                        <tr>
-                            <td colspan="2">Ip list is empty</td>
-                        </tr>
-                    {% endfor %}
+                <tbody id="results-body">
+                    <tr>
+                        <td>Results are empty</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
-        <div class="button-row">
-            <a href="{% url 'ip_create' %}">
-                <button>Add net</button>
-            </a>
-            <button disabled>Button 2</button>
-            <button disabled>Button 3</button>
-            <a href="{% url 'profiles_view' %}">
-                <button>Back to profiles</button>
-            </a>
         </div>
+
     </main>
+    <script src="{% static 'main_page.js' %}" type="text/javascript"></script>
+
 </body>
 </html>
