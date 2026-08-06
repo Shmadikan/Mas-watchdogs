@@ -1,11 +1,13 @@
 import pdb
 import json
+from redis.client import PubSub
+import redis
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.urls import reverse_lazy
-from django.views.generic import TemplateView, View, DetailView, UpdateView, CreateView, DeleteView
-
+from .apps import MainPageConfig
+from django.views.generic import View, UpdateView, CreateView, DeleteView, DetailView
 
 from .models import IpTable, ScanResult
 # Create your views here.
@@ -21,15 +23,15 @@ class ControlPage(LoginRequiredMixin, View):
 
 class ScanResultView(View):
     def get(self, request, *args, **kwargs):
-        scan_result = ScanResult.objects.all()
-        transform_data = list(map(lambda x: {
-            'id': x.pk,
-            'date': x.date.strftime('%Y.%m.%d %H:%M'),
-            'title': x.title,
-            'desc': x.description
-        }, scan_result))
+        transform_data = ScanResult.all_formating()
         response = JsonResponse(transform_data, safe=False)
         return response
+
+class ScanResultDetailView(View):
+    def get(self, request: HttpRequest, *args, **kwargs):
+        id = request.GET.get('id')
+        return ScanResult.get_format(id=id)
+
 
 
 
@@ -58,10 +60,38 @@ class IpPageDelete(IpCrudMixin, DeleteView):
 
 class IpPageAgentConnect(View):
     def post(self, request: HttpRequest, *args, **kwargs):
-        result = json.loads(request.body)
+        redis_client: redis.Redis = MainPageConfig.redis_client
+        results:list[dict[str, str]] = json.loads(request.body)
         try:
-            ScanResult.handle_ip(result)
+            ScanResult.handle_ip(results)
+            ip_list = []
+            for result in results:
+                ip = result['ip']
+                subnet = result['subnet']
+                id_result = result['id']
+                message = (IpTable.ipv4_transform(ip, subnet), id_result)
+                ip_list.append(message)
+            redis_client.publish('externalReceive', json.dumps(message))
             return HttpResponse(status=200)
         except Exception as e:
             print(e)
             return HttpResponse(status=400)
+
+class IpPageAgentPooling(View):
+    redis_client: redis.client.Redis = MainPageConfig.redis_client
+    def get(self, request: HttpRequest, *args, **kwargs):
+        return JsonResponse({'result_id_change': 2}, status=200)
+        message = MainPageConfig.pubsub.get_message()
+
+        if message:
+           if message['type'] == 'message':
+              data: dict = json.loads(message['data'])
+              id = data['id']
+              report = data['report']
+              scan_result = ScanResult.objects.get(id=id)
+              scan_result.title = 'result 1'
+              scan_result.description = report
+              scan_result.save()
+              return JsonResponse({'result_id_change': id}, status=200)
+        else:
+           return HttpResponse(status=204)
