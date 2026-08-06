@@ -23,19 +23,20 @@ def ping_scan(subnet):
     return list(scanner.all_hosts())
 
 
-def parse_nmap_result(results:list | tuple) -> list[tuple]:
-    res = []
+def parse_nmap_result(results:list | tuple) -> tuple[list[tuple], str]:
+    formated_result = []
     for result in results:
-        for host, ports in result.items():
-            for port, info in ports.items():
-                res.append((host, port, info))
-    return res
+        scan_result, scan_id = result
+        for host, ports in scan_result.items():
+            for port, info in scan_result.items():
+                formated_result.append((host, port, info))
+    return formated_result, scan_id
 
 
-def subnet_thread_analyze(subnet: str) -> dict:
+def subnet_thread_analyze(subnet: tuple[str, str]) -> tuple[dict, str]:
     scanner = nmap.PortScanner()
-    scanner.scan(hosts=subnet, arguments="-sS -sV -F -T4 --privileged")
-
+    scanner.scan(hosts=subnet[0], arguments="-sS -sV -F -T4 --privileged")
+    scan_id = subnet[1]
     results = {}
     for host in scanner.all_hosts():
         results[host] = {}
@@ -52,7 +53,7 @@ def subnet_thread_analyze(subnet: str) -> dict:
         scanned_nets[subnet] = results
 
     print(results,"fmkwemkfwrw")
-    return results
+    return results, scan_id
 
 
 
@@ -60,7 +61,7 @@ def subnet_thread_analyze(subnet: str) -> dict:
 async def execute_analyze_subnet(executor: Executor, redis_audit: RedisAuditor, loop: AbstractEventLoop):
 
     while True:
-        subnets_list: list = await queue.get()
+        subnets_list: list[tuple[str, str]] = await queue.get()
         print("start scanning...")
         tasks = []
         for net in subnets_list:
@@ -83,7 +84,7 @@ async def analyze_subnet_timer(executor: Executor, loop: AbstractEventLoop, redi
         for subnet in scanned_nets:
             if len(ping_scan(subnet)) != len(scanned_nets[subnet]):
                result = await loop.run_in_executor(executor, subnet_thread_analyze, subnet)
-               tuple_parameters:list[tuple] = parse_nmap_result([result])
+               tuple_parameters:list[tuple] = parse_nmap_result([result[0]])[0]
                data_send.extend(tuple_parameters)
 
 
@@ -104,7 +105,7 @@ async def main():
         asyncio.create_task(execute_analyze_subnet(executor, redis_audit, loop))
         while True:
             task = asyncio.create_task(redis_audit.data_from_external_source())
-            subnets:list[str] = await task
+            subnets:list[tuple[str, str]] = await task
             await queue.put(subnets)
 
 
