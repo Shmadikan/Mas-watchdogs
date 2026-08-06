@@ -26,7 +26,7 @@ async def send_data_to_api(redis_client):
     pass
 
 
-async def get_data_from_analyze(redis_client: RedisCoordinator):
+async def get_data_from_analyze(redis_client: RedisCoordinator, id):
     print("get data from analyze")
     data: list[dict] = await redis_client.queue_analyze.get()
     print(data)
@@ -54,13 +54,13 @@ async def get_data_from_analyze(redis_client: RedisCoordinator):
     report = json.loads(response.choices[0].message.content)
     pprint.pprint(report)
 
-    await redis_client.send_report_to_django(report)
+    await redis_client.send_report_to_django(report, id)
     print("Report sent to Django")
 
 
-async def send_data_to_analyze(data, redis_client):
+async def send_data_to_analyze(data, redis_client, id):
     await redis_client.send_to_analizator(data)
-    asyncio.create_task(get_data_from_analyze(redis_client))
+    asyncio.create_task(get_data_from_analyze(redis_client, id))
 
 
 async def main():
@@ -70,7 +70,8 @@ async def main():
     asyncio.create_task(inst.get_data())
     while True:
         answer = await inst.queue_auditor.get()
-        content_send = {"role":"user", "content": json.dumps(answer)}
+        scan, id = json.dumps(answer)
+        content_send = {"role": "user", "content": scan}
         print("Send to LLM...")
         response = client.chat.completions.create(
             model="deepseek-v4-pro",
@@ -83,7 +84,7 @@ async def main():
         )
         pprint.pprint(response.choices[0].message)
         answer_parsed = json.loads(response.choices[0].message.content)
-        asyncio.create_task(send_data_to_analyze(answer_parsed, inst))
+        asyncio.create_task(send_data_to_analyze(answer_parsed, inst, id))
         pprint.pprint(json.loads(response.choices[0].message.content))
 
 
