@@ -30,6 +30,7 @@ urlpatterns = [
     path('control/ip/delete/<int:pk>/', m_views.IpPageDelete.as_view(), name = "ip_delete"),
     path('control/send', m_views.IpPageAgentConnect.as_view(), name='ip_send'),
     path('control/results', m_views.ScanResultView.as_view(), name='ip_scan_results'),
+    path('control/polling', m_views.IpPageAgentPooling.as_view(), name='ip_polling'),
     path('profiles/', p_views.ProfilesView.as_view(), name = 'profiles_view'),
     path('profiles/registrate/', p_views.ProfileCreate.as_view(), name = 'profile_create'),
     path('__debug__/', include(debug_toolbar.urls))
