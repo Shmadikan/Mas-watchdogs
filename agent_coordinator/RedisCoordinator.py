@@ -46,11 +46,12 @@ class RedisCoordinator:
         await self.client.publish(self.analyze_send_channel, json.dumps(data))
 
 
-    async def send_report_to_django(self, report: dict):
-        async with aiohttp.ClientSession() as session:
-            async with session.post(self.django_url, json=report) as resp:
-                resp_text = await resp.text()
-                print(f"Django response: {resp.status} {resp_text}")
-                return resp_text
+    async def send_report_to_django(self, report: dict, id):
+        data = {
+            "report": report,
+            "id": id,
+        }
+        await self.client.publish('service_answer', json.dumps(data))
+
 
 
