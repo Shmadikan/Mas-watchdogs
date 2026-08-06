@@ -1,6 +1,29 @@
 const select_all = document.querySelector("#select-button")
 const analysis = document.querySelector("#analysis-button")
 const get_scan_result_url = document.body.getAttribute("data-get-url")
+const polling_result_url = document.body.getAttribute("data-poll-url")
+var intervals_id = new Map
+
+
+setInterval(() => {
+    fetch(polling_result_url).then((response) => {
+        if (response.status == 200) {
+            return response.json()
+        }
+    }).then((response) => {
+        return fetch(`${polling_result_url}/?id=${response['result_id_change']}`)
+    }).then((response) => {
+        return response.json()
+    }).then((result) => {
+        const tbody = document.querySelector('#results-body')
+        const tr = tbody.querySelector(`tr[data-id="${result.id}"]`)
+        if (tr) {
+            tr.querySelector('td').innerHTML = result.title + ' ' + result.date + ' ' + result.desc
+        }
+    })
+}, 3000)
+
+
 
 function get_result_data() {
     fetch(get_scan_result_url).then(
@@ -23,6 +46,7 @@ function get_result_data() {
                 tr.appendChild(td)
                 tbody.appendChild(tr)
             })
+            return tbody.children
         }
     )
 }
@@ -57,9 +81,11 @@ analysis.onclick = function (event) {
         headers: {
             'X-CSRFToken': csrf_token
         }
-    }).then(
+    }
+    ).then(
         (response)=>{
-            get_result_data()
+            data = get_result_data()
+            return data
         }
     ).catch(()=>{console.log("error")})
 }
