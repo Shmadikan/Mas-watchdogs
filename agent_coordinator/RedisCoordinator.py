@@ -1,3 +1,5 @@
+import pdb
+
 import redis.asyncio as redis
 import asyncio
 import json
@@ -35,6 +37,8 @@ class RedisCoordinator:
             if msg["type"] == "message":
                print("hey, got message!!!! from", msg["channel"])
                if msg["channel"] == self.auditor_receive_channel:
+
+                  print(json.loads(msg["data"]))
                   await self.queue_auditor.put(json.loads(msg["data"]))
 
                if msg["channel"] == self.analyze_receive_channel:
