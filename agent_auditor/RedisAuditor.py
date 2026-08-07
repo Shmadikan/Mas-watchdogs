@@ -33,5 +33,5 @@ class RedisAuditor:
 
 
     async def send_data_to_coordinator(self, message):
-        print("Отправляю данные")
+
         await self.client.publish(self.coordinator_channel, json.dumps(message))
