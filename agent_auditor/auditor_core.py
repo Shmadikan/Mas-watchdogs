@@ -1,5 +1,6 @@
 import asyncio
 import json
+import pdb
 from concurrent.futures import ThreadPoolExecutor
 
 from RedisAuditor import RedisAuditor
@@ -25,17 +26,20 @@ def ping_scan(subnet):
 
 def parse_nmap_result(results:list | tuple) -> tuple[list[tuple], str]:
     formated_result = []
+    scan_id = None
     for result in results:
         scan_result, scan_id = result
         for host, ports in scan_result.items():
-            for port, info in scan_result.items():
+            for port, info in ports.items():
                 formated_result.append((host, port, info))
+
     return formated_result, scan_id
 
 
 def subnet_thread_analyze(subnet: tuple[str, str]) -> tuple[dict, str]:
     scanner = nmap.PortScanner()
     scanner.scan(hosts=subnet[0], arguments="-sS -sV -F -T4 --privileged")
+    print(subnet)
     scan_id = subnet[1]
     results = {}
     for host in scanner.all_hosts():
@@ -50,7 +54,7 @@ def subnet_thread_analyze(subnet: tuple[str, str]) -> tuple[dict, str]:
                     "version": f'{service["product"]} {service["version"]}'.strip()
                 }
     with Lock:
-        scanned_nets[subnet] = results
+        scanned_nets[subnet[0]] = results
 
     print(results,"fmkwemkfwrw")
     return results, scan_id
@@ -63,6 +67,7 @@ async def execute_analyze_subnet(executor: Executor, redis_audit: RedisAuditor, 
     while True:
         subnets_list: list[tuple[str, str]] = await queue.get()
         print("start scanning...")
+        print(subnets_list)
         tasks = []
         for net in subnets_list:
             tasks.append(loop.run_in_executor(executor, subnet_thread_analyze, net))
@@ -71,7 +76,7 @@ async def execute_analyze_subnet(executor: Executor, redis_audit: RedisAuditor, 
         tuples_result = parse_nmap_result(results)
 
 
-        await redis_audit.send_data_to_coordinator(json.dumps(tuples_result))
+        await redis_audit.send_data_to_coordinator(tuples_result)
 
 
 
@@ -89,7 +94,7 @@ async def analyze_subnet_timer(executor: Executor, loop: AbstractEventLoop, redi
 
 
     if len(data_send) != 0:
-        await redis_audit.send_data_to_coordinator(json.dumps(data_send))
+        await redis_audit.send_data_to_coordinator(data_send)
 
     asyncio.create_task(analyze_subnet_timer(executor, loop, redis_audit))
 
