@@ -71,7 +71,7 @@ class IpPageAgentConnect(View):
                 id_result = result['id']
                 message = (IpTable.ipv4_transform(ip, subnet), id_result)
                 ip_list.append(message)
-            redis_client.publish('externalReceive', json.dumps(message))
+            redis_client.publish('externalReceive', json.dumps(ip_list))
             return HttpResponse(status=200)
         except Exception as e:
             print(e)
@@ -80,9 +80,7 @@ class IpPageAgentConnect(View):
 class IpPageAgentPooling(View):
     redis_client: redis.client.Redis = MainPageConfig.redis_client
     def get(self, request: HttpRequest, *args, **kwargs):
-        return JsonResponse({'result_id_change': 2}, status=200)
         message = MainPageConfig.pubsub.get_message()
-
         if message:
            if message['type'] == 'message':
               data: dict = json.loads(message['data'])
