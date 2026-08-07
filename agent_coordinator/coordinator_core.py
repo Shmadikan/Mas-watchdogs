@@ -1,4 +1,6 @@
 import asyncio
+import pdb
+
 from openai import OpenAI
 import json
 import pprint
@@ -36,8 +38,8 @@ async def get_data_from_analyze(redis_client: RedisCoordinator, id):
         "role": "user",
         "content": (
             "Ты — эксперт по кибербезопасности. На основе предоставленных результатов "
-            "сканирования уязвимостей сформируй итоговый отчёт в формате JSON. "
-            "Отчёт должен содержать: summary (краткая сводка), findings (список "
+            "сканирования уязвимостей сформируй итоговый отчёт в формате читаемом формате. "
+            "Отчёт должен содержать: итог: краткая сводка, findings (список "
             "найденных уязвимостей с severity и описанием), recommendations (рекомендации "
             "по устранению). Данные сканирования:\n"
             + json.dumps(scanned_vul, ensure_ascii=False)
@@ -70,8 +72,8 @@ async def main():
     asyncio.create_task(inst.get_data())
     while True:
         answer = await inst.queue_auditor.get()
-        scan, id = json.dumps(answer)
-        content_send = {"role": "user", "content": scan}
+        scan, id = answer
+        content_send = {"role": "user", "content": json.dumps(scan)}
         print("Send to LLM...")
         response = client.chat.completions.create(
             model="deepseek-v4-pro",
