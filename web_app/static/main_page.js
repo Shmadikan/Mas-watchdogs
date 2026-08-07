@@ -20,6 +20,8 @@ setInterval(() => {
         if (tr) {
             tr.querySelector('td').innerHTML = result.title + ' ' + result.date + ' ' + result.desc
         }
+    }).catch(()=>{
+        console.log("No data")
     })
 }, 3000)
 
