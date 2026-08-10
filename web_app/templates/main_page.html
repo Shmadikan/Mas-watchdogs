@@ -1,44 +1,24 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
-    <style>
-        .table-wrapper {
-            border: 1px solid var(--pico-muted-border-color);
-            min-height: 55vh;
-            max-height: 55vh;
-            overflow-y: auto;
-        }
-        .button-row {
-            display: flex;
-            gap: 0.5rem;
-        }
-        .ip-list {
-            display: inline-flex;
-            align-content: center;
-            justify-content: center;
-        }
-        .tables-row {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-        }
-        .ip-column {
-            width: 25%;
-        }
-        .ip-column .table-wrapper {
-            width: 100%;
-        }
-        .results-wrapper {
-            background-color: var(--pico-muted-border-color);
-            width: 60%;
-        }
-    </style>
-</head>
-<body data-get-url="{% url 'ip_scan_results' %}" data-poll-url="{% url 'ip_polling' %}">
-    {% load static %}
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Control Panel{% endblock %}
+{% block body_attrs %} data-get-url="{% url 'ip_scan_results' %}" data-poll-url="{% url 'ip_polling' %}" data-get-scan="{% url 'ip_scan_get' %}"{% endblock %}
+{% block content %}
+    <header class="app-header">
+        <nav>
+            <a href="{% url 'profile_setting' %}" title="Profiles" class="profile-nav-btn">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="8" r="4"/>
+                    <path d="M4 20c0-4 4-7 8-7s8 3 8 7"/>
+                </svg>
+            </a>
+            <a href="{% url 'system_settings' %}" title="System Settings" class="profile-nav-btn">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+            </a>
+        </nav>
+    </header>
     <main>
         <div class="tables-row">
             <div class="ip-column">
@@ -52,14 +32,11 @@
                             </tr>
                         </thead>
                         <tbody>
-                            
                             {% for item in ips %}
                                 <tr id="ip-table">
-                                
                                     <td> <a href="{% url 'ip' item.id %}" data-user-id="{{item.id}}">{{ item.ip }}</a> </td>
                                     <td><a>{{ item.subnet }}</a></td>
                                     <td><input type="checkbox" class="ip-list"></td>
-                                    
                                 </tr>
                             {% empty %}
                                 <tr>
@@ -81,24 +58,25 @@
                 </div>
             </div>
 
-            <div class="table-wrapper results-wrapper">
+            <div class="results-wrapper">
             <table>
                 <thead>
                     <tr>
+                        <th></th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody id="results-body">
                     <tr>
-                        <td>Results are empty</td>
+                        <td colspan="2">Results are empty</td>
                     </tr>
                 </tbody>
             </table>
+            <button id="delete-results-button" data-delete-url="{% url 'ip_scan_delete' %}">Delete</button>
         </div>
         </div>
-
     </main>
-    <script src="{% static 'main_page.js' %}" type="text/javascript"></script>
-
-</body>
-</html>
+{% endblock %}
+{% block scripts %}
+<script src="{% static 'main_page.js' %}" type="text/javascript"></script>
+{% endblock %}
