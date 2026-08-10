@@ -17,8 +17,10 @@ class RedisCoordinator:
         self.analyze_send_channel = "coordinator-analyze"
         self.auditor_receive_channel = "auditor-coordinator"
         self.analyze_receive_channel = "analyze-coordinator"
+        self.web_app_settings = "webapp-coordinator"
         self.queue_analyze = asyncio.Queue()
         self.queue_auditor = asyncio.Queue()
+        self.queue_settings = asyncio.Queue()
         self.pubsub = self.client.pubsub()
         self.iterator = None
         self.django_url = "http://localhost:8729/analyze_result/"
@@ -28,6 +30,7 @@ class RedisCoordinator:
         instance = RedisCoordinator()
         await instance.pubsub.subscribe(instance.analyze_receive_channel)
         await instance.pubsub.subscribe(instance.auditor_receive_channel)
+        await instance.pubsub.subscribe(instance.web_app_settings)
         instance.iterator = instance.pubsub.listen()
         return instance
 
@@ -45,15 +48,20 @@ class RedisCoordinator:
                   print("I think i dont have data:", msg["data"])
                   await self.queue_analyze.put(json.loads(msg["data"]))
 
+               if msg["channel"] == self.web_app_settings:
+                  await self.queue_settings.put(json.loads(msg["data"]))
+
 
     async def send_to_analizator(self, data: dict[str, dict]):
         await self.client.publish(self.analyze_send_channel, json.dumps(data))
 
 
-    async def send_report_to_django(self, report: dict, id):
+    async def send_report_to_django(self, report: str | Exception, id):
+        if isinstance(report, Exception):
+            report = str(report)
         data = {
-            "report": report,
-            "id": id,
+            'report': report,
+            'id': id,
         }
         await self.client.publish('service_answer', json.dumps(data))
 
