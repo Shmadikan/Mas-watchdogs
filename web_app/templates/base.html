@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en" data-theme="auto">
+<head>
+    <script>
+    function getCookie(name) {
+      let matches = document.cookie.match(new RegExp(
+        "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+      ));
+      return matches ? decodeURIComponent(matches[1]) : undefined;
+    }
+    document.documentElement.setAttribute('data-theme', getCookie('theme'));
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}WatchDog-MAS{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+    <link rel="stylesheet" href="{% static 'themes.css' %}">
+    {% block head_extra %}{% endblock %}
+</head>
+<body{% block body_attrs %}{% endblock %}>
+    {% block content %}{% endblock %}
+    {% block scripts %}{% endblock %}
+
+    <script>
+        (function() {
+            var cookie = document.cookie.split('; ').find(function(r) { return r.startsWith('theme='); });
+            if (!cookie) return;
+            var theme = cookie.split('=')[1];
+            if (!theme || theme === 'default') return;
+            var root = document.documentElement;
+
+            var hexMatch = /^#[0-9a-fA-F]{6}$/;
+            if (hexMatch.test(theme)) {
+                root.setAttribute('data-theme', 'custom');
+                var hex = theme.slice(1);
+                var r = parseInt(hex.slice(0, 2), 16);
+                var g = parseInt(hex.slice(2, 4), 16);
+                var b = parseInt(hex.slice(4, 6), 16);
+                var hover = '#' + [r, g, b].map(function(v) {
+                    return Math.floor(v * 0.85).toString(16).padStart(2, '0');
+                }).join('');
+                root.style.setProperty('--pico-primary', theme);
+                root.style.setProperty('--pico-primary-hover', hover);
+                root.style.setProperty('--pico-primary-rgb', r + ',' + g + ',' + b);
+            } else {
+                root.setAttribute('data-theme', theme);
+            }
+        })();
+    </script>
+</body>
+</html>
