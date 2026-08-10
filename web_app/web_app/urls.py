@@ -15,12 +15,11 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path
 from main_page import views as m_views
 from profiles import views as p_views
-from django.contrib.auth.views import LoginView
 
-import debug_toolbar
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -30,8 +29,13 @@ urlpatterns = [
     path('control/ip/delete/<int:pk>/', m_views.IpPageDelete.as_view(), name = "ip_delete"),
     path('control/send', m_views.IpPageAgentConnect.as_view(), name='ip_send'),
     path('control/results', m_views.ScanResultView.as_view(), name='ip_scan_results'),
+    path('control/results/get/', m_views.ScanResultObjectView.as_view(), name='ip_scan_get'),
+    path('control/results/<int:pk>/', m_views.ScanResultDetailView.as_view(), name='ip_scan_detail'),
+    path('control/results/delete', m_views.ScanResultDelete.as_view(), name='ip_scan_delete'),
     path('control/polling', m_views.IpPageAgentPooling.as_view(), name='ip_polling'),
     path('profiles/', p_views.ProfilesView.as_view(), name = 'profiles_view'),
     path('profiles/registrate/', p_views.ProfileCreate.as_view(), name = 'profile_create'),
-    path('__debug__/', include(debug_toolbar.urls))
+    path('profiles/settings', p_views.Profile.as_view(), name='profile_setting'),
+    path('profiles/system', p_views.ProfileSystemSetting.as_view(), name='system_settings'),
+    path('', p_views.RedirectFromStart.as_view(), name='start'),
 ]
