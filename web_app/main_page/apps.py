@@ -4,7 +4,7 @@ from redis.client import PubSub
 
 class MainPageConfig(AppConfig):
     name = 'main_page'
-    redis_client = None
+    redis_client: redis.Redis | None = None
     pubsub: PubSub = None
 
     def ready(self):
