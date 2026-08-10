@@ -57,12 +57,3 @@ async def main():
             asyncio.create_task(collect_all_info(tasks, RedisConnection))
 
 asyncio.run(main())
-
-
-
-
-
-
-
-
-
