@@ -1,3 +1,5 @@
+import pdb
+
 from django.utils.timezone import now
 from django.db import models
 from django.db.models import CASCADE
@@ -23,10 +25,10 @@ class ScanResult(models.Model):
 
     @classmethod
     def handle_ip(cls, ip_list: list[dict[str, str]]):
-
         for data in ip_list:
             scan = ScanResult(title="", description="", date=now(), ip_fk=IpTable.objects.get(id=data['id']))
             scan.save()
+            yield scan
 
     @classmethod
     def all_formating(cls):
@@ -35,7 +37,7 @@ class ScanResult(models.Model):
             'id': x.pk,
             'date': x.date.strftime('%Y.%m.%d %H:%M'),
             'title': x.title,
-            'desc': x.description
+            'ready': True if x.description != "" else False
         }, data))
 
     @classmethod
