@@ -147,33 +147,3 @@ class NmapScannerStrategy(AbstractScannerStrategy):
 
 
         return ""
-"""
-test = {
-            "172.17.0.4": {
-                "ports": {
-                    "21":   {"scripts": ["ftp_vsftpd_backdoor"]},
-                    "25":   {"scripts": ["ssl_weak_dh", "ssl_check_poodle"]},
-                    "5432": {"scripts": ["ssl_check_ccs_injection"]},
-                    "8180": {"scripts": ["http_slowloris"]}
-                },
-                "global_scripts": ["check_bounce_attack"],
-                "scanner": "nmap",
-                "ping": False,
-                "scan_speed": "aggressive",
-                "intensity": "high"
-            }
-        }
-
-test2 = {
-            "172.17.0.4": {
-                "global_scripts": ["vuln"],
-                "scanner": "nmap",
-                "ping": False,
-                "scan_speed": "aggressive",
-                "intensity": "high"
-            }
-        }
-
-Nm = NmapScannerStrategy(("172.17.0.4",test["172.17.0.4"]))
-print(Nm.execute())
-"""
