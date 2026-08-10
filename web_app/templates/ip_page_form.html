@@ -1,17 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Edit IP</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
-    <style>
-        .form-card {
-            max-width: 480px;
-            margin: 2rem auto;
-        }
-    </style>
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %}{% if object %}Edit IP{% else %}Create IP{% endif %}{% endblock %}
+{% block content %}
     <main class="container">
         <nav>
             <ul>
@@ -52,5 +41,4 @@
             </form>
         </article>
     </main>
-</body>
-</html>
+{% endblock %}
