@@ -26,7 +26,7 @@ class ProfilesView(View):
             user = User.objects.get_by_natural_key(request.POST.get('username'))
             login(request, user)
             user_setting = user.setting
-            response = HttpResponseRedirect('http://127.0.0.1:8188/control/', status=302)
+            response = HttpResponseRedirect(reverse_lazy('control_page'), status=302)
             response.set_cookie('language', user_setting.language)
             response.set_cookie('theme', user_setting.site_theme)
             response.set_cookie('pooling', user_setting.pooling_interval)
