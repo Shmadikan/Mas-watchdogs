@@ -1,5 +1,3 @@
-import pdb
-
 import redis.asyncio as redis
 import asyncio
 import json
@@ -9,8 +7,8 @@ import aiohttp
 class RedisCoordinator:
     def __init__(self):
         self.client = redis.Redis(
-            host="localhost",
-            port=6379,
+            host=os.getenv("REDIS_HOST", "localhost"),
+            port=int(os.getenv("REDIS_PORT", "6379")),
             db=0,
             decode_responses=True
         )
@@ -23,7 +21,6 @@ class RedisCoordinator:
         self.queue_settings = asyncio.Queue()
         self.pubsub = self.client.pubsub()
         self.iterator = None
-        self.django_url = "http://localhost:8729/analyze_result/"
 
     @classmethod
     async def create_connection(cls):
