@@ -1,19 +1,31 @@
 import asyncio
-import pdb
+import os
 
 from openai import OpenAI
 import json
-import keyring
 import pprint
 from RedisCoordinator import RedisCoordinator
 
-api_key = keyring.get_password('app', 'api_key')
-base_url = keyring.get_password('app', 'model_url')
+SETTINGS_FILE = os.environ.get("SETTINGS_FILE", "/app/data/settings.json")
 
-client = OpenAI(
-    api_key=api_key,
-    base_url=base_url
-)
+
+def load_settings() -> dict:
+    try:
+        with open(SETTINGS_FILE, "r") as file:
+            return json.load(file)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+
+def save_settings(data: dict):
+    os.makedirs(os.path.dirname(SETTINGS_FILE), exist_ok=True)
+    with open(SETTINGS_FILE, "w") as file:
+        json.dump(data, file, indent=2)
+
+
+settings = load_settings()
+
+client = None
 
 
 with open("PROMPT.md", "r") as file:
@@ -29,9 +41,12 @@ async def get_settings(redis_client: RedisCoordinator, client: OpenAI):
     while True:
         print(client.base_url, client.api_key)
         data: dict = await redis_client.queue_settings.get()
-        keyring.set_password('app', 'api_key', data['api-key'])
-        keyring.set_password('app', 'model_url', data['model-url'])
-        keyring.set_password('app', 'model', data['model'])
+        settings.update({
+            "api_key": data['api-key'],
+            "model_url": data['model-url'],
+            "model": data['model'],
+        })
+        save_settings(settings)
         client.base_url = data['model-url']
         client.api_key = data['api-key']
 
@@ -59,7 +74,7 @@ async def get_data_from_analyze(redis_client: RedisCoordinator, id):
     try:
         print("Generating final LLM report...")
         response = client.chat.completions.create(
-            model=keyring.get_password('app', 'model'),
+            model=settings.get("model"),
             messages=[{"role": "system", "content": SYSTEM_PROMPT}, report_prompt],
             reasoning_effort="medium",
             extra_body={"thinking": {"type": "enabled"}}
@@ -78,17 +93,22 @@ async def send_data_to_analyze(data, redis_client, id):
 
 
 async def main():
-
+    global client
     inst = await RedisCoordinator.create_connection()
     asyncio.create_task(inst.get_data())
     asyncio.create_task(get_settings(inst, client))
     while True:
         answer = await inst.queue_auditor.get()
+        if client is None:
+            client = OpenAI(
+                api_key=settings.get("api_key"),
+                base_url=settings.get("model_url")
+            )
         scan, id = answer
         content_send = {"role": "user", "content": json.dumps(scan)}
         print("Send to LLM...")
         response = client.chat.completions.create(
-            model=keyring.get_password('app', 'model'),
+            model=settings.get("model"),
             messages=messages+[content_send],
             response_format={
                 'type': 'json_object'
