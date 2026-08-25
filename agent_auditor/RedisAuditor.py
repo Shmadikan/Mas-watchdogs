@@ -1,7 +1,7 @@
 import redis.asyncio as redis
 import asyncio
 import json
-
+import os
 
 class RedisAuditor:
     def __init__(self):
