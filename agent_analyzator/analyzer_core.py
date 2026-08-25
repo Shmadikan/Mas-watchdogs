@@ -9,7 +9,6 @@ from ScannersStrategy.SearchSplotScannerStrategy import SearchSplotScannerStrate
 
 def instructions_for_agent_execute(instructions:tuple[str, dict]):
     """Исполнение в потоке какого то из сканеров (пока три пусть, но расширяемо через стратегии)"""
-    print(instructions)
     scanner_name = instructions[1].get("scanner", "nmap")
     scanner: AbstractScannerStrategy | None = None
     if scanner_name == "nmap":
@@ -27,7 +26,6 @@ def instructions_for_agent_execute(instructions:tuple[str, dict]):
 
 async def run_analyzer_flow(instructions_for_agent: tuple[str, dict], loop: AbstractEventLoop, executor, redis_connector):
     result = await loop.run_in_executor(executor, instructions_for_agent_execute, instructions_for_agent)
-    print(result)
     return result
 
 async def collect_all_info(tasks, redis_connector):
