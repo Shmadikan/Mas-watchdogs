@@ -1,5 +1,5 @@
 import redis.asyncio as redis
-import asyncio
+import os
 import json
 
 
@@ -7,8 +7,8 @@ class RedisAnalyzator:
 
     def __init__(self, channels):
         self.client = redis.Redis(
-            host="localhost",
-            port=6379,
+            host=os.getenv("REDIS_HOST", "localhost"),
+            port=int(os.getenv("REDIS_PORT", "6379")),
             db=0,
             decode_responses=True
         )
