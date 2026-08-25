@@ -1,5 +1,7 @@
 # WatchDog-MAS
-
+<div align="center">
+  <img src="https://freesvg.org/img/1473396732.png" alt="Cerberus"/>
+</div>  
 > A multi-agent system for network vulnerability analysis. Three autonomous agents — **Auditor**, **Coordinator**, and **Analyzer** — work together to discover, plan, and perform security scans, coordinated through a Django web application.
 
 <div align="center">
