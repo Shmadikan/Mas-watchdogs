@@ -39,7 +39,6 @@ scanned_vul = []
 
 async def get_settings(redis_client: RedisCoordinator, client: OpenAI):
     while True:
-        print(client.base_url, client.api_key)
         data: dict = await redis_client.queue_settings.get()
         settings.update({
             "api_key": data['api-key'],
@@ -49,9 +48,6 @@ async def get_settings(redis_client: RedisCoordinator, client: OpenAI):
         save_settings(settings)
         client.base_url = data['model-url']
         client.api_key = data['api-key']
-
-        print(client.base_url, client.api_key)
-
 
 
 async def get_data_from_analyze(redis_client: RedisCoordinator, id):
