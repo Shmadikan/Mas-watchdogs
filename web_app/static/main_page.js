@@ -15,7 +15,7 @@ function getCookie(name) {
 
 var intervals_id = new Map
 
-/*
+
 setInterval(() => {
     fetch(polling_result_url).then((response) => {
         if (response.status == 200) {
@@ -38,7 +38,7 @@ setInterval(() => {
         console.log("No data")
     })
 }, Number.parseInt(getCookie('pooling')) * 1000)
-*/
+
 
 
 function get_result_data() {
