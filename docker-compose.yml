@@ -1,0 +1,57 @@
+services:
+  web:
+    build: .
+    working_dir: /app/web_app
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:9873"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    ports:
+      - "9873:9873"
+    volumes:
+      - sqlite:/app/web_app/database
+    depends_on:
+      - redis
+
+  agent_coordinator:
+    build: .
+    working_dir: /app/agent_coordinator
+    command: python coordinator_core.py
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    volumes:
+      - data:/app/data
+    depends_on:
+      - redis
+
+  agent_auditor:
+    build: .
+    working_dir: /app/agent_auditor
+    command: python auditor_core.py
+    environment:
+      - REDIS_HOST=127.0.0.1
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+    network_mode: host
+
+  agent_analysis:
+    build: .
+    working_dir: /app/agent_analyzator
+    command: python analyzer_core.py
+    environment:
+      - REDIS_HOST=127.0.0.1
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+    network_mode: host
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+volumes:
+  sqlite:
+  data:
