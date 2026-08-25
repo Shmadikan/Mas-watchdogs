@@ -64,14 +64,36 @@ The executor. Performs the actual vulnerability scanning using existing tools �
 
 The Analyzer is extended through the **Strategy pattern**. Every supported tool implements a common interface, so new scanners can be added without touching the core logic.
 
-## Web application
+## Django application
 
-The system is operated through a **Django** web application. Features include:
+The system is operated through a **Django** web application. Its features are split into the following areas.
 
-- User profiles with individual settings (language, theme, polling interval).
-- CRUD management of IP addresses and subnets to scan.
-- Sending selected targets to the agents and tracking scan results in real time.
-- System settings for the LLM (API key, model URL, model name).
+### Multiple profiles
+
+The main feature of the web application is support for **multiple profiles**. A user can create several profiles, each dedicated to a different set of network segments to scan. Every profile keeps its own agent configuration, its own scan tables, results, and history — so different segments stay fully isolated from one another.
+
+![Multiple profiles](docs/screenshots/profiles.png)
+
+### Adding and scanning network segments
+
+Within a profile, the user can add new network segments (IP addresses and subnets) and launch them for analysis. The selected targets are sent to the agents, and the scan runs asynchronously while the user tracks its status and results.
+
+![Network segments](docs/screenshots/segments.png)
+
+### Profile customization
+
+A profile can be tuned to the user's taste, both visually and technically:
+
+- **Polling** — the interval at which the UI polls for new scan results.
+- **Themes** — visual themes for the interface.
+
+![Profile customization](docs/screenshots/customization.png)
+
+### Model configuration
+
+The user can configure the LLM models used by the system — API key, endpoint URL, and model name — which are pushed to the Coordinator at runtime.
+
+![Model configuration](docs/screenshots/models.png)
 
 > Note: the web application is still under active development — some features are not complete yet.
 
@@ -85,18 +107,6 @@ Agents communicate asynchronously via **Redis Pub/Sub**. There is no direct coup
 ```
 
 ![Overall interaction](diagrams/01_overall_interaction.png)
-
-### Scan flow
-
-1. The web application publishes a list of subnets to the `externalReceive` channel.
-2. The **Auditor** scans them and publishes host/service data to `auditor-coordinator`.
-3. The **Coordinator** sends this data to the LLM and receives a JSON scan plan.
-4. The Coordinator publishes the plan to `coordinator-analyze`.
-5. The **Analyzer** picks a scanner strategy and executes the scan.
-6. The results are published back to `analyze-coordinator`.
-7. The **Coordinator** generates a final report and publishes it to `service_answer`, which the web application polls.
-
-An example of the Coordinator→Analyzer JSON task can be found in [`example.md`](example.md).
 
 ## Project structure
 
