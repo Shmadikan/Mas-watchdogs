@@ -4,8 +4,6 @@
 </div>  
 > A multi-agent system for network vulnerability analysis. Three autonomous agents — **Auditor**, **Coordinator**, and **Analyzer** — work together to discover, plan, and perform security scans, coordinated through a Django web application.
 
-<div align="center">
-
 ![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![Django](https://img.shields.io/badge/Django-6.0-092E20?style=for-the-badge&logo=django&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=for-the-badge&logo=redis&logoColor=white)
@@ -73,14 +71,16 @@ The system is operated through a **Django** web application. Its features are sp
 ### Multiple profiles
 
 The main feature of the web application is support for **multiple profiles**. A user can create several profiles, each dedicated to a different set of network segments to scan. Every profile keeps its own agent configuration, its own scan tables, results, and history — so different segments stay fully isolated from one another.
-
-![Multiple profiles](docs/screenshots/profiles.png)
+<div align="center">
+<img width="716" height="843" alt="изображение" src="https://github.com/user-attachments/assets/35bfc7a2-d116-43bd-a376-8123ad01e787" />
+</div>
 
 ### Adding and scanning network segments
 
 Within a profile, the user can add new network segments (IP addresses and subnets) and launch them for analysis. The selected targets are sent to the agents, and the scan runs asynchronously while the user tracks its status and results.
-
-![Network segments](docs/screenshots/segments.png)
+<div align="center">
+<img width="1859" height="798" alt="изображение" src="https://github.com/user-attachments/assets/989d8a58-0f51-4713-9887-565ba74bb8c7" />
+</div>
 
 ### Profile customization
 
@@ -88,14 +88,16 @@ A profile can be tuned to the user's taste, both visually and technically:
 
 - **Polling** — the interval at which the UI polls for new scan results.
 - **Themes** — visual themes for the interface.
-
-![Profile customization](docs/screenshots/customization.png)
+<div align="center">
+<img width="633" height="722" alt="изображение" src="https://github.com/user-attachments/assets/469c9138-12b7-437a-b075-178075ae9d74" />
+</div>
 
 ### Model configuration
 
 The user can configure the LLM models used by the system — API key, endpoint URL, and model name — which are pushed to the Coordinator at runtime.
-
-![Model configuration](docs/screenshots/models.png)
+<div align="center">
+<img width="576" height="763" alt="изображение" src="https://github.com/user-attachments/assets/95fc75d1-13a3-4229-aba1-253a99d406a1" />
+</div>
 
 > Note: the web application is still under active development — some features are not complete yet.
 
